@@ -67,12 +67,14 @@
     import Alpine from './node_modules/alpinejs/dist/module.esm.js';
     import errors from './packages/errors/src/index.js';
     import pagination, { bootstrap5 } from './packages/pagination/src/index.js';
+    import modal from './packages/modal/src/index.js';
 
     const axios = window.axios;
     const MockAdapter = window.AxiosMockAdapter;
 
     errors(Alpine);
     pagination(Alpine).template('bootstrap5', bootstrap5);
+    modal(Alpine);
 
     Alpine.$errors.registerAxiosInterceptor(axios);
 
@@ -83,6 +85,7 @@
     });
 
     Alpine.start();
+    window.Alpine = Alpine;
 </script>
 </body>
 </html>
