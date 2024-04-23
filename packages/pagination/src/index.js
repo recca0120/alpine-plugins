@@ -1,6 +1,9 @@
 import { tailwind } from './templates/tailwind.js';
 import { bootstrap5 } from './templates/bootstrap5.js';
 
+/**
+ * @returns {number[]}
+ */
 const range = (start, stop, step = 1) => {
     const r = [];
     for (let i = start; i <= stop; i += step) {
@@ -15,6 +18,9 @@ class UrlWindow {
         this.options = options;
     }
 
+    /**
+     * @returns {({ first?: number[], slider?: number[], last?: number[] })}
+     */
     get() {
         const onEachSide = this.options.onEachSide;
 
@@ -122,10 +128,18 @@ export default function (Alpine) {
             },
             elements() {
                 const window = new UrlWindow({
-                    current_page: this.current_page, last_page: this.last_page, onEachSide: this.on_each_side,
+                    current_page: this.current_page,
+                    last_page: this.last_page,
+                    onEachSide: this.on_each_side,
                 }).get();
 
-                return [window.first, window.slider instanceof Array ? '...' : null, window.slider, window.last instanceof Array ? '...' : null, window.last].filter((v) => !!v).reduce((elements, items) => {
+                return [
+                    window.first,
+                    window.slider instanceof Array ? '...' : null,
+                    window.slider,
+                    window.last instanceof Array ? '...' : null,
+                    window.last,
+                ].filter((v) => !!v).reduce((elements, items) => {
                     return elements.concat(items instanceof String ? [items] : items);
                 }, []);
             },
