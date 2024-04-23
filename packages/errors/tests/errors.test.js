@@ -7,18 +7,20 @@ describe('Alpine $errors', () => {
         const component = document.createElement('div');
         component.innerHTML = `
             <div x-data>
-                <div class="input-group">
-                    <input
-                        type="text"
-                        name="${name}"
-                        class="form-control"
-                        @keyup="$errors.remove('${name}')"
-                        :class="{'is-invalid': $errors.has('${name}')}"
-                        role="input" />
+                <div>
+                    <label for="${name}" class="block text-sm font-medium leading-6 text-gray-900">${name}</label>
+                    <div class="relative mt-2 rounded-md shadow-sm">
+                        <input type="text" name="${name}" id="${name}"
+                               class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                               :class="{'text-red-900 ring-red-300 placeholder:text-red-300 focus:ring-red-500': $errors.has('${name}')}"
+                               @keyup="$errors.remove('${name}')"
+                               role="input">
+                    </div>
+
+                    <template x-if="$errors.has('${name}')">
+                        <p x-text="$errors.first('${name}')" class="mt-2 text-sm text-red-600" id="${name}-error" role="error-message"></p>
+                    </template>
                 </div>
-                <template x-if="$errors.has('${name}')">
-                    <div class="invalid-feedback" x-text="$errors.first('${name}')" role="error-message"></div>
-                </template>
             </div>
         `;
         document.body.append(component);
@@ -41,7 +43,7 @@ describe('Alpine $errors', () => {
 
     afterEach(() => document.body.innerHTML = '');
 
-    const getInvalidInputs = () => screen.queryAllByRole('input').filter(el => el.classList.contains('is-invalid'));
+    const getInvalidInputs = () => screen.queryAllByRole('input').filter(el => el.classList.contains('text-red-900'));
     const getErrorMessages = () => screen.queryAllByRole('error-message');
 
     async function expectShowError() {
