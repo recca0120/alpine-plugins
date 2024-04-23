@@ -29,13 +29,7 @@ describe('Alpine pagination directive', () => {
     const givenComponent = (options, callback = emptyFn) => {
         const component = document.createElement('div');
         component.innerHTML = `
-            <div x-data="{
-                pagination: {
-                    total: ${options.total},
-                    per_page: ${options.per_page},
-                    current_page: ${options.current_page} 
-                }
-            }">
+            <div x-data='{ pagination: ${JSON.stringify(options)} }'>
                 <div x-pagination='pagination' role="pagination"/>
             </div>
         `;
@@ -58,6 +52,7 @@ describe('Alpine pagination directive', () => {
         await Alpine.nextTick(() => {
             const pagination = screen.getByRole('pagination');
 
+            expect((document.querySelector('nav').classList.contains('flex'))).toBeTruthy();
             expect(getPrev(pagination).tagName).toEqual('SPAN');
             expect(getNext(pagination).tagName).toEqual('SPAN');
             expect(getPages(pagination)).toEqual([1]);
@@ -122,6 +117,19 @@ describe('Alpine pagination directive', () => {
             const pagination = screen.getByRole('pagination');
 
             fireEvent.click(getPrev(pagination));
+        });
+    });
+
+    it('render bootstrap5', async () => {
+        givenComponent({current_page: 1, per_page: 10, total: 5, view: 'bootstrap5'});
+
+        await Alpine.nextTick(() => {
+            const pagination = screen.getByRole('pagination');
+
+            expect((document.querySelector('nav').classList.contains('d-flex'))).toBeTruthy();
+            expect(getPrev(pagination).tagName).toEqual('SPAN');
+            expect(getNext(pagination).tagName).toEqual('SPAN');
+            expect(getPages(pagination)).toEqual([1]);
         });
     });
 });
