@@ -1,4 +1,4 @@
-import * as templates from './pagination.template.js';
+import { bootstrap5, tailwind } from './templates.js';
 
 const range = (start, stop, step = 1) => {
     const r = [];
@@ -151,12 +151,16 @@ export default function (Alpine) {
         };
     });
 
+    const render = (expression, view) => {
+        if (view === 'bootstrap5') {
+            return bootstrap5(expression);
+        }
+
+        return tailwind(expression);
+    };
+
     Alpine.directive('pagination', (el, {expression}, {evaluateLater, effect}) => {
-        const defaultView = 'tailwind';
         const evaluator = evaluateLater(expression);
-        effect(() => evaluator(value => {
-            const render = templates[value.view ?? defaultView] ?? defaultView;
-            el.innerHTML = render(JSON.stringify(value));
-        }));
+        effect(() => evaluator(value => el.innerHTML = render(JSON.stringify(value), value.view ?? 'tailwind')));
     });
 }

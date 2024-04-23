@@ -1,5 +1,5 @@
 import Alpine from 'alpinejs';
-import plugin from './pagination';
+import plugin from './index.js';
 import { fireEvent, screen } from '@testing-library/dom';
 import he from 'he';
 

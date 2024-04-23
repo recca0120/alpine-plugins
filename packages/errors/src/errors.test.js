@@ -1,6 +1,6 @@
 import Alpine from 'alpinejs';
 import { fireEvent, screen } from '@testing-library/dom';
-import plugin from './errors';
+import plugin from './index.js';
 
 describe('Alpine $errors', () => {
     const givenComponent = (name) => {
