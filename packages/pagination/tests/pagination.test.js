@@ -1,7 +1,7 @@
-import Alpine from 'alpinejs';
-import plugin from './index.js';
 import { fireEvent, screen } from '@testing-library/dom';
 import he from 'he';
+import Alpine from 'alpinejs';
+import plugin from '../src';
 
 describe('Alpine pagination directive', () => {
     const emptyFn = () => {

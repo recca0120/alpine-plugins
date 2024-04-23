@@ -1,4 +1,5 @@
-import { bootstrap5, tailwind } from './templates.js';
+import { tailwind } from './templates/tailwind.js';
+import { bootstrap5 } from './templates/bootstrap5.js';
 
 const range = (start, stop, step = 1) => {
     const r = [];
