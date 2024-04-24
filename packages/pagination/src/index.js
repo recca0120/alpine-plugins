@@ -1,30 +1,19 @@
 import { tailwind } from './templates/tailwind.js';
 import { bootstrap5 } from './templates/bootstrap5.js';
 
-/**
- * @returns {number[]}
- */
-const range = (start, stop, step = 1) => {
-    const r = [];
-    for (let i = start; i <= stop; i += step) {
-        r.push(i);
-    }
-
-    return r;
-};
 
 class UrlWindow {
-    constructor(options) {
-        this.options = options;
+    constructor(paginator) {
+        this.paginator = paginator;
     }
 
     /**
      * @returns {({ first?: number[], slider?: number[], last?: number[] })}
      */
     get() {
-        const onEachSide = this.options.onEachSide;
+        const onEachSide = this.paginator.onEachSide;
 
-        if (this.lastPage() < (onEachSide * 2) + 8) {
+        if (this.paginator.lastPage() < (onEachSide * 2) + 8) {
             return this.getSmallSlider();
         }
 
@@ -33,7 +22,9 @@ class UrlWindow {
 
     getSmallSlider() {
         return {
-            'first': range(1, this.lastPage()), 'slider': null, 'last': null,
+            'first': this.paginator.getUrlRange(1, this.lastPage()),
+            'slider': null,
+            'last': null,
         };
     }
 
@@ -41,9 +32,7 @@ class UrlWindow {
         const window = onEachSide + 4;
 
         if (!this.hasPages()) {
-            return {
-                'first': null, 'slider': null, 'last': null,
-            };
+            return {'first': null, 'slider': null, 'last': null};
         }
 
         if (this.currentPage() <= window) {
@@ -57,46 +46,61 @@ class UrlWindow {
 
     getSliderTooCloseToBeginning(window, onEachSide) {
         return {
-            'first': range(1, window + onEachSide), 'slider': null, 'last': this.getFinish(),
+            'first': this.paginator.getUrlRange(1, window + onEachSide),
+            'slider': null,
+            'last': this.getFinish(),
         };
     }
 
     getSliderTooCloseToEnding(window, onEachSide) {
-        const last = range(this.lastPage() - (window + (onEachSide - 1)), this.lastPage());
+        const last = this.paginator.getUrlRange(
+            this.lastPage() - (window + (onEachSide - 1)),
+            this.lastPage(),
+        );
 
         return {
-            'first': this.getStart(), 'slider': null, 'last': last,
+            'first': this.getStart(),
+            'slider': null,
+            'last': last,
         };
     }
 
     getFullSlider(onEachSide) {
         return {
-            'first': this.getStart(), 'slider': this.getAdjacentUrlRange(onEachSide), 'last': this.getFinish(),
+            'first': this.getStart(),
+            'slider': this.getAdjacentUrlRange(onEachSide),
+            'last': this.getFinish(),
         };
     }
 
     getAdjacentUrlRange(onEachSide) {
-        return range(this.currentPage() - onEachSide, this.currentPage() + onEachSide);
+        return this.paginator.getUrlRange(
+            this.currentPage() - onEachSide,
+            this.currentPage() + onEachSide,
+        );
     }
 
     getStart() {
-        return range(1, 2);
+        return this.paginator.getUrlRange(1, 2);
     }
 
     getFinish() {
-        return range(this.lastPage() - 1, this.lastPage());
+        return this.paginator.getUrlRange(
+            this.lastPage() - 1,
+            this.lastPage(),
+        );
     }
 
     hasPages() {
-        return this.lastPage() > 1;
+        return this.paginator.lastPage() > 1;
     }
 
     currentPage() {
-        return this.options.current_page;
+        return this.paginator.currentPage();
     }
 
     lastPage() {
-        return this.options.last_page;
+        return this.paginator.lastPage();
     }
 }
 
@@ -108,30 +112,38 @@ export default function (Alpine) {
             per_page: options.per_page ?? 10,
             current_page: Math.max(options.current_page ?? 1, 1),
             on_each_side: options.on_each_side ?? 3,
+            get onEachSide() {
+                return this.on_each_side;
+            },
             get last_page() {
-                return Math.ceil(this.total / this.per_page);
+                return Math.ceil(this.total / this.perPage());
             },
             get from() {
-                return ((this.current_page - 1) * this.per_page) + 1;
+                return ((this.currentPage() - 1) * this.perPage()) + 1;
             },
             get to() {
-                return Math.min(this.current_page * this.per_page, this.total);
+                return Math.min(this.currentPage() * this.perPage(), this.total);
+            },
+            perPage() {
+                return this.per_page;
+            },
+            currentPage() {
+                return this.current_page;
+            },
+            lastPage() {
+                return this.last_page;
             },
             onFirstPage() {
-                return !this.current_page || this.current_page <= 1;
+                return !this.currentPage() || this.currentPage() <= 1;
             },
             hasPages() {
-                return this.current_page !== 1 || this.hasMorePages();
+                return this.currentPage() !== 1 || this.hasMorePages();
             },
             hasMorePages() {
-                return !!this.current_page && this.current_page < this.last_page;
+                return !!this.currentPage() && this.currentPage() < this.last_page;
             },
             elements() {
-                const window = new UrlWindow({
-                    current_page: this.current_page,
-                    last_page: this.last_page,
-                    onEachSide: this.on_each_side,
-                }).get();
+                const window = new UrlWindow(this).get();
 
                 return [
                     window.first,
@@ -162,6 +174,15 @@ export default function (Alpine) {
                 if (page !== '...') {
                     this.$dispatch('change', page);
                 }
+            },
+            /** @returns {number[]} */
+            getUrlRange(start, stop, step = 1) {
+                const range = [];
+                for (let i = start; i <= stop; i += step) {
+                    range.push(i);
+                }
+
+                return range;
             },
         };
     });
