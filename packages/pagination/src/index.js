@@ -106,7 +106,7 @@ export default function (Alpine) {
         return {
             total: options.total ?? 0,
             per_page: options.per_page ?? 10,
-            current_page: options.current_page ?? 0,
+            current_page: Math.max(options.current_page ?? 1, 1),
             on_each_side: options.on_each_side ?? 3,
             get last_page() {
                 return Math.ceil(this.total / this.per_page);

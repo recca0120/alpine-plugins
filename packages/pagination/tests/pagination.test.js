@@ -46,6 +46,19 @@ describe('Alpine pagination directive', () => {
 
     beforeEach(() => document.body.innerHTML = '');
 
+    it('render empty parameters', async () => {
+        givenComponent({});
+
+        await Alpine.nextTick(() => {
+            const pagination = screen.getByRole('pagination');
+
+            expect(document.querySelector('nav').style.display).toEqual('none');
+            expect(getPrev(pagination).tagName).toEqual('SPAN');
+            expect(getNext(pagination).tagName).toEqual('SPAN');
+            expect(getPages(pagination)).toEqual([]);
+        });
+    });
+
     it('render perPage is 10 and total is 5', async () => {
         givenComponent({current_page: 1, per_page: 10, total: 5});
 
