@@ -33,5 +33,5 @@ jobs:
       - name: Install Npm Dependencies
         run: npm ci
 
-      - name: Test
+      - name: Execute tests
         run: npm run test -- --coverage

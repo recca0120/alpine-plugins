@@ -1,5 +1,5 @@
 export const bootstrap5 = () => {
-    return `<nav x-data='{expression}' x-show="hasPages()" class="d-flex justify-items-center justify-content-between">
+    return `<nav x-data='{expression}' x-cloak x-show="hasPages()" class="d-flex justify-items-center justify-content-between">
     <div class="d-flex justify-content-between flex-fill d-sm-none">
         <ul class="pagination">
             <li x-show="onFirstPage()" class="page-item disabled" aria-disabled="true">

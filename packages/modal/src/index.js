@@ -1,8 +1,9 @@
 const html = `
 <div x-show="open"
+     x-cloak
+     x-id="['modal-title']"
      @keydown.window.escape.prevent.stop="keyboard ? close() : ''"
      @click="backdrop ? close() : ''"
-     x-id="['modal-title']"
      :aria-labelledby="$id('modal-title')"
      class="relative z-10" 
      role="dialog" 
@@ -41,6 +42,7 @@ const html = `
                   To: "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
             -->
             <div @click.stop 
+                 x-trap.noscroll.inert="open"
                  x-transition:enter="ease-out duration-300" 
                  x-transition:enter-start="opacity-0"
                  x-transition:enter-end="opacity-100"
@@ -74,7 +76,7 @@ const html = `
                         <div x-html="message" 
                              x-show="message" 
                              class="mt-2 text-sm text-gray-500"
-                         ></div>
+                        ></div>
                         <template x-if="prompt">
                             <input x-model="input" 
                                    :class="{'text-red-900 ring-red-300 placeholder:text-red-300 focus:ring-red-500': invalid}"
