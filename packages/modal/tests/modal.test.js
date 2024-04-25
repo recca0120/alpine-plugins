@@ -1,5 +1,5 @@
 import Alpine from 'alpinejs';
-import plugin from '..';
+import plugin from '../src/index.js';
 import { fireEvent, screen } from '@testing-library/dom';
 
 describe('Alpine $modal', () => {
@@ -47,7 +47,7 @@ describe('Alpine $modal', () => {
 
     it('set title', async () => {
         async function shouldBe(title) {
-            Alpine.$alert('hello world', title);
+            Alpine.$alert('hello world', {title});
             await Alpine.nextTick(async () => {
                 const dialog = screen.queryByRole('dialog');
                 expect(dialog.querySelector('[x-html=title]').innerHTML).toEqual(title);

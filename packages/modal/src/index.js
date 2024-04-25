@@ -55,8 +55,10 @@ const html = `
                     </div>
                 </div>
                 <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-                    <button @click="close" type="button" class="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto">Deactivate</button>
-                    <button @click="close" type="button" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancel</button>
+                    <template x-for="button of buttons">
+                        <button @click="button.handle()" type="button" :class="button.class" x-html="button.text"></button>
+                    </template>
+                    
                 </div>
             </div>
         </div>
@@ -71,34 +73,53 @@ export default function (Alpine) {
 
     const modal = Alpine.reactive({
         open: false,
+        callback: null,
         title: '',
         message: '',
-        show() {
+        _buttons: [{}],
+        get buttons() {
+            return this._buttons.map((button) => {
+                if (button.handle) {
+                    button.handle = button.handle.bind(this);
+                } else {
+                    button.handle = () => {
+                    };
+                }
+                return button;
+            });
+        },
+        async show(attributes) {
+            this.title = attributes.title ?? '';
+            this.message = attributes.message ?? '';
+
             this.open = true;
+
+            return new Promise((resolve) => {
+                this.callback = (result) => resolve(result);
+            });
         },
-        close() {
+        close(result = undefined) {
+            if (this.callback instanceof Function) {
+                this.callback(result);
+                this.callback = null;
+            }
             this.open = false;
-        },
-        setTitle(title) {
-            this.title = title;
-
-            return this;
-        },
-        setMessage(message) {
-            this.message = message;
-
-            return this;
         },
     });
 
     Alpine.data('ModalComponent', () => modal);
 
     Object.defineProperty(Alpine, '$alert', {
-        get: () => (message, title) => {
-            return modal
-                .setMessage(message)
-                .setTitle(title)
-                .show();
+        get: () => async (message, attributes) => {
+            return modal.show({
+                ...attributes, message, buttons: [{
+                    class: 'inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto',
+                    text: 'OK',
+                    handle: function () {
+                        this.close();
+                    },
+                }],
+            });
         },
     });
 }
