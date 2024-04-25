@@ -102,22 +102,27 @@ class UrlWindow {
     }
 }
 
-export default function (Alpine) {
-    let i18n = {
-        'Pagination Navigation': 'Pagination Navigation',
-        'pagination.previous': '&laquo; Previous',
-        'pagination.next': 'Next &raquo;',
-        'Go to page :page': 'Go to page :page',
-        'Showing': 'Showing',
-        'from': 'from',
-        'to': 'to',
-        'of': 'of',
-        'results': 'results',
-    };
-    const templates = {tailwind: tailwind()};
+export default function (Alpine, defaults = {}) {
+    defaults = Alpine.reactive({
+        i18n: {
+            'Pagination Navigation': 'Pagination Navigation',
+            'pagination.previous': '&laquo; Previous',
+            'pagination.next': 'Next &raquo;',
+            'Go to page :page': 'Go to page :page',
+            'Showing': 'Showing',
+            'from': 'from',
+            'to': 'to',
+            'of': 'of',
+            'results': 'results',
+        },
+        views: {
+            _default: 'tailwind',
+            template: {tailwind: tailwind()},
+        },
+        ...defaults,
+    });
 
-    let defaults = 'tailwind';
-    const render = (value) => templates[value.template ?? defaults].replace(
+    const render = (value) => defaults.views.template[value.template ?? defaults.views._default].replace(
         '{expression}', `PaginationComponent(${JSON.stringify(value)})`,
     );
 
@@ -181,7 +186,7 @@ export default function (Alpine) {
                 }
             },
             __(key, parameters = {}) {
-                return Object.entries(parameters).reduce((text, [key, value]) => text.replace(`:${key}`, value), i18n[key]);
+                return Object.entries(parameters).reduce((text, [key, value]) => text.replace(`:${key}`, value), defaults.i18n[key]);
             },
             /** @returns {number[]} */
             getUrlRange(start, stop, step = 1) {
@@ -197,20 +202,20 @@ export default function (Alpine) {
 
     return {
         use(name) {
-            defaults = name;
+            defaults.views._default = name;
 
             return this;
         },
         template(name, html) {
-            templates[name] = html instanceof Function ? html() : html;
+            defaults.views.template[name] = html instanceof Function ? html() : html;
 
             return this;
         },
         i18n(key, value) {
             if (typeof key === 'object') {
-                i18n = {...i18n, ...key};
+                defaults.i18n = {...defaults.i18n, ...key};
             } else {
-                i18n[key] = value;
+                defaults.i18n[key] = value;
             }
         },
     };
