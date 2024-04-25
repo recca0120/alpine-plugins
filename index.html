@@ -11,6 +11,8 @@
 <body>
 <div class="container mx-auto p-5">
     <div x-data class="mb-10">
+        <h2 class="mb-2">Errors</h2>
+
         <div class="mb-5">
             <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email</label>
             <div class="relative mt-2 rounded-md shadow-sm">
@@ -53,11 +55,38 @@
         </div>
     </div>
 
+    <div x-data class="mt-5">
+        <h2 class="mb-2">Dialog</h2>
+
+        <button type="button"
+                class="rounded-md bg-indigo-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+                @click="$alert('alert message')"
+        >
+            Alert
+        </button>
+
+        <button type="button"
+                class="rounded-md bg-indigo-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+                @click="alert(await $confirm('are you sure ?'))"
+        >
+            Confirm
+        </button>
+
+        <button type="button"
+                class="rounded-md bg-indigo-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+                @click="alert(await $prompt('please input your email.'))"
+        >
+            Prompt
+        </button>
+    </div>
+
     <div x-data="{pagination: {
         current_page: 5,
         total: 1000,
         // template: 'bootstrap5',
-    }}" @change="pagination.current_page = event.detail">
+    }}" @change="pagination.current_page = event.detail" class="mt-5">
+        <h2 class="mb-2">Pagination</h2>
+
         <div x-pagination="pagination"></div>
     </div>
 </div>
@@ -67,12 +96,14 @@
     import Alpine from './node_modules/alpinejs/dist/module.esm.js';
     import errors from './packages/errors/src/index.js';
     import pagination, { bootstrap5 } from './packages/pagination/src/index.js';
+    import modal from './packages/modal/src/index.js';
 
     const axios = window.axios;
     const MockAdapter = window.AxiosMockAdapter;
 
     errors(Alpine);
     pagination(Alpine).template('bootstrap5', bootstrap5);
+    modal(Alpine);
 
     Alpine.$errors.registerAxiosInterceptor(axios);
 
@@ -83,6 +114,7 @@
     });
 
     Alpine.start();
+    window.Alpine = Alpine;
 </script>
 </body>
 </html>
