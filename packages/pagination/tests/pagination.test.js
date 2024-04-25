@@ -1,7 +1,7 @@
 import { fireEvent, screen } from '@testing-library/dom';
 import he from 'he';
 import Alpine from 'alpinejs';
-import plugin from '../src';
+import plugin, { bootstrap5 } from '../src';
 
 describe('Alpine pagination directive', () => {
     const emptyFn = () => {
@@ -134,7 +134,13 @@ describe('Alpine pagination directive', () => {
     });
 
     it('render bootstrap5', async () => {
-        givenComponent({current_page: 1, per_page: 10, total: 5, view: 'bootstrap5'});
+        const template = document.createElement('script');
+        template.type = 'text/template';
+        template.id = 'bootstrap5';
+        template.innerHTML = bootstrap5();
+        document.body.append(template);
+
+        givenComponent({current_page: 1, per_page: 10, total: 5, template: '#bootstrap5'});
 
         await Alpine.nextTick(() => {
             const pagination = screen.getByRole('pagination');

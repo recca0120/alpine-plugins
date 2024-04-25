@@ -1,15 +1,13 @@
+export * from './templates/tailwind.js';
+export * from './templates/bootstrap5.js';
 import { tailwind } from './templates/tailwind.js';
-import { bootstrap5 } from './templates/bootstrap5.js';
-
 
 class UrlWindow {
     constructor(paginator) {
         this.paginator = paginator;
     }
 
-    /**
-     * @returns {({ first?: number[], slider?: number[], last?: number[] })}
-     */
+    /** @returns {({ first?: number[], slider?: number[], last?: number[] })} */
     get() {
         const onEachSide = this.paginator.onEachSide;
 
@@ -105,7 +103,7 @@ class UrlWindow {
 }
 
 
-export default function (Alpine) {
+export default function (Alpine, template = tailwind) {
     Alpine.data('PaginationComponent', (options) => {
         return {
             total: options.total ?? 0,
@@ -187,16 +185,21 @@ export default function (Alpine) {
         };
     });
 
-    const render = (expression, view) => {
-        if (view === 'bootstrap5') {
-            return bootstrap5(expression);
+    const getTemplate = (selector) => {
+        if (selector) {
+            try {
+                return document.querySelector(selector).innerHTML;
+            } catch (e) {
+                console.error(e);
+            }
         }
 
-        return tailwind(expression);
+        return template instanceof Function ? template() : template;
     };
+    const render = (expression, html) => html.replace('{expression}', `PaginationComponent(${expression})`);
 
     Alpine.directive('pagination', (el, {expression}, {evaluateLater, effect}) => {
         const evaluator = evaluateLater(expression);
-        effect(() => evaluator(value => el.innerHTML = render(JSON.stringify(value), value.view ?? 'tailwind')));
+        effect(() => evaluator(value => el.innerHTML = render(JSON.stringify(value), getTemplate(value.template))));
     });
 }
