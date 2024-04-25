@@ -77,31 +77,30 @@ class MessageBag {
             return value === null ? acc : {...acc, [key]: value};
         }, {});
     }
+
+    registerAxiosInterceptor(axios) {
+        const beforeRequest = (config) => {
+            this.clear();
+
+            return config;
+        };
+        const onError = (err) => {
+            const {status, data} = err.response;
+
+            if (status === 422) {
+                this.set(data.errors);
+            }
+
+            return Promise.reject(err);
+        };
+
+        axios.interceptors.request.use(beforeRequest, err => Promise.reject(err));
+        axios.interceptors.response.use(response => response, onError);
+    }
 }
 
 export default function (Alpine) {
     const errors = new MessageBag(Alpine.reactive({}));
-
     Alpine.magic('errors', () => errors);
     Object.defineProperty(Alpine, '$errors', {get: () => errors});
-}
-
-export function registerAxiosInterceptor(axios) {
-    const beforeRequest = (config) => {
-        Alpine.$errors.clear();
-
-        return config;
-    };
-    const onError = (err) => {
-        const {status, data} = err.response;
-
-        if (status === 422) {
-            Alpine.$errors.set(data.errors);
-        }
-
-        return Promise.reject(err);
-    };
-
-    axios.interceptors.request.use(beforeRequest, err => Promise.reject(err));
-    axios.interceptors.response.use(response => response, onError);
 }

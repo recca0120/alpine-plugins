@@ -1,4 +1,6 @@
 import { fireEvent, screen } from '@testing-library/dom';
+import axios from 'axios';
+import MockAdapter from 'axios-mock-adapter';
 import Alpine from 'alpinejs';
 import plugin from '../src';
 
@@ -30,6 +32,14 @@ describe('Alpine $errors', () => {
 
     beforeAll(() => {
         plugin(Alpine);
+
+        const mock = new MockAdapter(axios);
+        mock.onPost('/users').reply(422, {
+            'message': 'The email field must be a valid email address.',
+            'errors': {'email': ['The email field must be a valid email address.']},
+        });
+        Alpine.$errors.registerAxiosInterceptor(axios);
+
         Alpine.start();
     });
 
@@ -37,7 +47,7 @@ describe('Alpine $errors', () => {
 
     beforeEach(() => {
         document.body.innerHTML = '';
-        givenComponent('username');
+        givenComponent('email');
         givenComponent('password');
     });
 
@@ -47,17 +57,16 @@ describe('Alpine $errors', () => {
     const getErrorMessages = () => screen.queryAllByRole('error-message');
 
     async function expectShowError() {
-        const validateError = {
-            'status': 'fail',
-            'message': '發生錯誤！',
-            'errors': {'username': ['帳號 已經存在。']},
-            'error': '帳號 已經存在。',
-        };
-        await Alpine.nextTick(() => Alpine.$errors.set(validateError.errors));
+
+
+        try {
+            await axios.post('/users');
+        } catch (e) {
+        }
 
         expect(getInvalidInputs()).toHaveLength(1);
         expect(getErrorMessages()).toHaveLength(1);
-        expect(getErrorMessages()[0].innerHTML).toContain('帳號 已經存在。');
+        expect(getErrorMessages()[0].innerHTML).toContain('The email field must be a valid email address.');
     }
 
     it('show errors', async () => {
@@ -79,6 +88,6 @@ describe('Alpine $errors', () => {
         const invalidInput = getInvalidInputs()[0];
         await Alpine.nextTick(() => fireEvent.keyUp(invalidInput));
 
-        expect(invalidInput.classList).not.toContain('is-invalid');
+        expect(invalidInput.classList).not.toContain('text-red-900');
     });
 });

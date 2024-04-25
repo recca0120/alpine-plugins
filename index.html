@@ -9,7 +9,7 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
 </head>
 <body>
-<div class="container mx-auto py-5">
+<div class="container mx-auto p-5">
     <div x-data class="mb-10">
         <div class="mb-5">
             <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email</label>
@@ -46,7 +46,7 @@
         <div class="text-start">
             <button type="button"
                     class="rounded-md bg-indigo-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
-                    @click="$errors.set('email', ['Not a valid email address.'])"
+                    @click="await axios.post('/users')"
             >
                 Submit
             </button>
@@ -57,16 +57,28 @@
         <div x-pagination="pagination"></div>
     </div>
 </div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.6.8/axios.min.js"></script>
+<script src="https://unpkg.com/axios-mock-adapter/dist/axios-mock-adapter.min.js"></script>
 <script type="module">
     import Alpine from './node_modules/alpinejs/dist/module.esm.js';
     import errors from './packages/errors/src/index.js';
     import pagination from './packages/pagination/src/index.js';
 
+    const axios = window.axios;
+    const MockAdapter = window.AxiosMockAdapter;
+
     errors(Alpine);
     pagination(Alpine);
 
+    Alpine.$errors.registerAxiosInterceptor(axios);
+
     Alpine.start();
 
+    const mock = new MockAdapter(window.axios);
+    mock.onPost('/users').reply(422, {
+        'message': 'The email field must be a valid email address.',
+        'errors': {'email': ['The email field must be a valid email address.']},
+    });
 </script>
 </body>
 </html>
