@@ -110,7 +110,7 @@
     const mock = new MockAdapter(window.axios);
     mock.onPost('/users').reply(422, {
         'message': 'The email field must be a valid email address.',
-        'errors': {'email': ['The email field must be a valid email address.']},
+        'errors': { 'email': ['The email field must be a valid email address.'] },
     });
 
     Alpine.start();

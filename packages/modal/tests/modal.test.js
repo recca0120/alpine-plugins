@@ -49,7 +49,7 @@ describe('Alpine $modal', () => {
 
     it('set title', async () => {
         async function shouldBe(title) {
-            Alpine.$alert('hello world', {title});
+            Alpine.$alert('hello world', { title });
             await Alpine.nextTick(async () => {
                 await delay(500);
                 const dialog = screen.queryByRole('dialog');

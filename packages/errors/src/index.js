@@ -1,20 +1,6 @@
-class Primitive {
-    constructor(value) {
-        this.value = value;
-    }
-
-    getValue() {
-        return this.value;
-    }
-
-    static is(value) {
-        return [true, false, null, undefined].includes(value);
-    }
-}
-
 class MessageBag {
     constructor(errors = {}) {
-        this._errors = errors;
+        this.errors = errors;
     }
 
     set(key, value) {
@@ -22,30 +8,23 @@ class MessageBag {
     }
 
     put(key, value) {
-        const values = typeof key === 'object' ? key : {[key]: value};
+        const values = typeof key === 'object' ? key : { [key]: value };
 
         for (const x in values) {
             let val = values[x];
-            if (Primitive.is(val)) {
-                val = new Primitive(val);
-            }
 
-            this._errors[x] = typeof val === 'string' ? [val] : val;
+            this.errors[x] = typeof val === 'string' ? [val] : val;
         }
 
         return this;
     }
 
     get(key) {
-        if (!this._errors.hasOwnProperty(key) || !this._errors[key]) {
+        if (!this.errors.hasOwnProperty(key) || !this.errors[key]) {
             this.put(key, null);
         }
 
-        if (this._errors[key] instanceof Primitive) {
-            return this._errors[key].getValue();
-        }
-
-        return this._errors[key];
+        return this.errors[key];
     }
 
     has(key) {
@@ -67,14 +46,14 @@ class MessageBag {
     }
 
     clear() {
-        this.remove(...Object.keys(this._errors));
+        this.remove(...Object.keys(this.errors));
     }
 
     all() {
-        return Object.keys(this._errors).reduce((acc, key) => {
+        return Object.keys(this.errors).reduce((acc, key) => {
             const value = this.get(key);
 
-            return value === null ? acc : {...acc, [key]: value};
+            return value === null ? acc : { ...acc, [key]: value };
         }, {});
     }
 
@@ -85,7 +64,7 @@ class MessageBag {
             return config;
         };
         const onError = (err) => {
-            const {status, data} = err.response;
+            const { status, data } = err.response;
 
             if (status === 422) {
                 this.set(data.errors);
@@ -100,7 +79,7 @@ class MessageBag {
 }
 
 export default function (Alpine) {
-    const errors = new MessageBag(Alpine.reactive({}));
+    const errors = Alpine.reactive(new MessageBag());
     Alpine.magic('errors', () => errors);
-    Object.defineProperty(Alpine, '$errors', {get: () => errors});
+    Object.defineProperty(Alpine, '$errors', { get: () => errors });
 }

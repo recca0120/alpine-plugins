@@ -1,5 +1,5 @@
-export const tailwind = () => {
-    return `<nav x-data='{expression}' x-cloak  x-show="hasPages()" :aria-label="__('Pagination Navigation')" class="flex items-center justify-between" role="navigation">
+const template = `
+<nav x-data='{expression}' x-cloak  x-show="hasPages()" :aria-label="__('Pagination Navigation')" class="flex items-center justify-between" role="navigation">
     <div class="flex justify-between flex-1 sm:hidden">
         <span x-show="onFirstPage()" x-html="__('pagination.previous')" class="relative inline-flex items-center px-4 py-2 text-sm font-medium text-gray-500 bg-white border border-gray-300 cursor-default leading-5 rounded-md dark:text-gray-600 dark:bg-gray-800 dark:border-gray-600">
         </span>
@@ -96,4 +96,9 @@ export const tailwind = () => {
         </div>
     </div>
 </nav>`;
-};
+
+export function tailwind() {
+    const name = 'tailwind';
+
+    return { views: { _default: name, templates: { [name]: template } } };
+}

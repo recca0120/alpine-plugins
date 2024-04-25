@@ -1,5 +1,5 @@
-export const bootstrap5 = () => {
-    return `<nav x-data='{expression}' x-cloak x-show="hasPages()" class="d-flex justify-items-center justify-content-between">
+const template = `
+<nav x-data='{expression}' x-cloak x-show="hasPages()" class="d-flex justify-items-center justify-content-between">
     <div class="d-flex justify-content-between flex-fill d-sm-none">
         <ul class="pagination">
             <li x-show="onFirstPage()" class="page-item disabled" aria-disabled="true">
@@ -89,4 +89,9 @@ export const bootstrap5 = () => {
         </div>
     </div>
 </nav>`;
-};
+
+export function bootstrap5() {
+    const name = 'bootstrap5';
+
+    return { views: { _default: name, templates: { [name]: template } } };
+}

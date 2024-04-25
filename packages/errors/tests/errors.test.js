@@ -36,7 +36,7 @@ describe('Alpine $errors', () => {
         const mock = new MockAdapter(axios);
         mock.onPost('/users').reply(422, {
             'message': 'The email field must be a valid email address.',
-            'errors': {'email': ['The email field must be a valid email address.']},
+            'errors': { 'email': ['The email field must be a valid email address.'] },
         });
         Alpine.$errors.registerAxiosInterceptor(axios);
 

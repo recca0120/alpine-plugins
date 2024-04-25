@@ -8,7 +8,7 @@ describe('Alpine pagination directive', () => {
     };
 
     const encode = (text) => {
-        return he.encode(text, {'useNamedReferences': true, 'decimal': true});
+        return he.encode(text, { 'useNamedReferences': true, 'decimal': true });
     };
 
     const getPages = pagination => Array.from(pagination.querySelectorAll('nav a[x-text="page"]'))
@@ -60,7 +60,7 @@ describe('Alpine pagination directive', () => {
     });
 
     it('render perPage is 10 and total is 5', async () => {
-        givenComponent({current_page: 1, per_page: 10, total: 5});
+        givenComponent({ current_page: 1, per_page: 10, total: 5 });
 
         await Alpine.nextTick(() => {
             const pagination = screen.getByRole('pagination');
@@ -73,7 +73,7 @@ describe('Alpine pagination directive', () => {
     });
 
     it('render perPage is 10 and total is 10000', async () => {
-        givenComponent({current_page: 500, per_page: 10, total: 10000});
+        givenComponent({ current_page: 500, per_page: 10, total: 10000 });
 
         await Alpine.nextTick(() => {
             const pagination = screen.getByRole('pagination');
@@ -85,7 +85,7 @@ describe('Alpine pagination directive', () => {
     });
 
     it('current_page is first page', async () => {
-        givenComponent({current_page: 1, per_page: 10, total: 100});
+        givenComponent({ current_page: 1, per_page: 10, total: 100 });
 
         await Alpine.nextTick(() => {
             const pagination = screen.getByRole('pagination');
@@ -97,7 +97,7 @@ describe('Alpine pagination directive', () => {
     });
 
     it('current_page is last page', async () => {
-        givenComponent({current_page: 10, per_page: 10, total: 100});
+        givenComponent({ current_page: 10, per_page: 10, total: 100 });
 
         await Alpine.nextTick(() => {
             const pagination = screen.getByRole('pagination');
@@ -109,7 +109,7 @@ describe('Alpine pagination directive', () => {
     });
 
     it('current_page is 5 of 10', async () => {
-        givenComponent({current_page: 5, per_page: 10, total: 100});
+        givenComponent({ current_page: 5, per_page: 10, total: 100 });
 
         await Alpine.nextTick(() => {
             const pagination = screen.getByRole('pagination');
@@ -121,7 +121,7 @@ describe('Alpine pagination directive', () => {
     });
 
     it('fire page change', (done) => {
-        givenComponent({current_page: 500, per_page: 10, total: 10000}, (e) => {
+        givenComponent({ current_page: 500, per_page: 10, total: 10000 }, (e) => {
             expect(e.detail).toEqual(499);
             done();
         });
@@ -134,7 +134,7 @@ describe('Alpine pagination directive', () => {
     });
 
     it('render bootstrap5', async () => {
-        givenComponent({current_page: 1, per_page: 10, total: 5, template: 'bootstrap5'});
+        givenComponent({ current_page: 1, per_page: 10, total: 5, template: 'bootstrap5' });
 
         await Alpine.nextTick(() => {
             const pagination = screen.getByRole('pagination');

@@ -30,7 +30,7 @@ class UrlWindow {
         const window = onEachSide + 4;
 
         if (!this.hasPages()) {
-            return {'first': null, 'slider': null, 'last': null};
+            return { 'first': null, 'slider': null, 'last': null };
         }
 
         if (this.currentPage() <= window) {
@@ -102,7 +102,97 @@ class UrlWindow {
     }
 }
 
+class Paginator {
+    total = 0;
+    per_page = 10;
+    current_page = 1;
+    on_each_side = 3;
+
+    constructor(options = {}, defaults = {}) {
+        this.total = options.total ?? 0;
+        this.per_page = options.per_page ?? 10;
+        this.current_page = Math.max(options.current_page ?? 1, 1);
+        this.on_each_side = options.on_each_side ?? 3;
+        this.defaults = defaults;
+    }
+
+    get onEachSide() {
+        return this.on_each_side;
+    }
+
+    get last_page() {
+        return Math.ceil(this.total / this.perPage());
+    }
+
+    get from() {
+        return ((this.currentPage() - 1) * this.perPage()) + 1;
+    }
+
+    get to() {
+        return Math.min(this.currentPage() * this.perPage(), this.total);
+    }
+
+    perPage() {
+        return this.per_page;
+    }
+
+    currentPage() {
+        return this.current_page;
+    }
+
+    lastPage() {
+        return this.last_page;
+    }
+
+    onFirstPage() {
+        return !this.currentPage() || this.currentPage() <= 1;
+    }
+
+    hasPages() {
+        return this.currentPage() !== 1 || this.hasMorePages();
+    }
+
+    hasMorePages() {
+        return !!this.currentPage() && this.currentPage() < this.last_page;
+    }
+
+    elements() {
+        const window = new UrlWindow(this).get();
+
+        return [
+            window.first,
+            window.slider instanceof Array ? '...' : null,
+            window.slider,
+            window.last instanceof Array ? '...' : null,
+            window.last,
+        ].filter((v) => !!v).reduce((elements, items) => {
+            return elements.concat(items instanceof String ? [items] : items);
+        }, []);
+    }
+
+    change(page) {
+        if (page !== '...') {
+            this.$dispatch('change', page);
+        }
+    }
+
+    __(key, parameters = {}) {
+        return Object.entries(parameters).reduce((text, [key, value]) => text.replace(`:${key}`, value), this.defaults.i18n[key]);
+    }
+
+    /** @returns {number[]} */
+    getUrlRange(start, stop, step = 1) {
+        const range = [];
+        for (let i = start; i <= stop; i += step) {
+            range.push(i);
+        }
+
+        return range;
+    }
+}
+
 export default function (Alpine, defaults = {}) {
+    const { views } = tailwind();
     defaults = Alpine.reactive({
         i18n: {
             'Pagination Navigation': 'Pagination Navigation',
@@ -115,90 +205,20 @@ export default function (Alpine, defaults = {}) {
             'of': 'of',
             'results': 'results',
         },
-        views: {
-            _default: 'tailwind',
-            template: {tailwind: tailwind()},
-        },
+        views: views,
         ...defaults,
     });
 
-    const render = (value) => defaults.views.template[value.template ?? defaults.views._default].replace(
+    const render = (value) => defaults.views.templates[value.template ?? defaults.views._default].replace(
         '{expression}', `PaginationComponent(${JSON.stringify(value)})`,
     );
 
-    Alpine.directive('pagination', (el, {expression}, {evaluateLater, effect}) => {
+    Alpine.directive('pagination', (el, { expression }, { evaluateLater, effect }) => {
         const evaluator = evaluateLater(expression);
         effect(() => evaluator(value => el.innerHTML = render(value)));
     });
 
-    Alpine.data('PaginationComponent', (options) => {
-        return {
-            total: options.total ?? 0,
-            per_page: options.per_page ?? 10,
-            current_page: Math.max(options.current_page ?? 1, 1),
-            on_each_side: options.on_each_side ?? 3,
-            get onEachSide() {
-                return this.on_each_side;
-            },
-            get last_page() {
-                return Math.ceil(this.total / this.perPage());
-            },
-            get from() {
-                return ((this.currentPage() - 1) * this.perPage()) + 1;
-            },
-            get to() {
-                return Math.min(this.currentPage() * this.perPage(), this.total);
-            },
-            perPage() {
-                return this.per_page;
-            },
-            currentPage() {
-                return this.current_page;
-            },
-            lastPage() {
-                return this.last_page;
-            },
-            onFirstPage() {
-                return !this.currentPage() || this.currentPage() <= 1;
-            },
-            hasPages() {
-                return this.currentPage() !== 1 || this.hasMorePages();
-            },
-            hasMorePages() {
-                return !!this.currentPage() && this.currentPage() < this.last_page;
-            },
-            elements() {
-                const window = new UrlWindow(this).get();
-
-                return [
-                    window.first,
-                    window.slider instanceof Array ? '...' : null,
-                    window.slider,
-                    window.last instanceof Array ? '...' : null,
-                    window.last,
-                ].filter((v) => !!v).reduce((elements, items) => {
-                    return elements.concat(items instanceof String ? [items] : items);
-                }, []);
-            },
-            change(page) {
-                if (page !== '...') {
-                    this.$dispatch('change', page);
-                }
-            },
-            __(key, parameters = {}) {
-                return Object.entries(parameters).reduce((text, [key, value]) => text.replace(`:${key}`, value), defaults.i18n[key]);
-            },
-            /** @returns {number[]} */
-            getUrlRange(start, stop, step = 1) {
-                const range = [];
-                for (let i = start; i <= stop; i += step) {
-                    range.push(i);
-                }
-
-                return range;
-            },
-        };
-    });
+    Alpine.data('PaginationComponent', (options) => new Paginator(options, defaults));
 
     return {
         use(name) {
@@ -207,13 +227,20 @@ export default function (Alpine, defaults = {}) {
             return this;
         },
         template(name, html) {
-            defaults.views.template[name] = html instanceof Function ? html() : html;
+            if (!html instanceof Function) {
+                defaults.views.templates[name] = html;
+
+                return this;
+            }
+
+            const { views } = html();
+            defaults.views.templates[name] = views.templates[views._default];
 
             return this;
         },
         i18n(key, value) {
             if (typeof key === 'object') {
-                defaults.i18n = {...defaults.i18n, ...key};
+                defaults.i18n = { ...defaults.i18n, ...key };
             } else {
                 defaults.i18n[key] = value;
             }
