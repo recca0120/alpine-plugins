@@ -75,4 +75,26 @@ describe('Alpine $modal', () => {
             });
         });
     });
+
+    describe('$prompt', () => {
+        it('get prompt', async () => {
+            const promise = Alpine.$prompt('input your name.');
+            await Alpine.nextTick(async () => {
+                const input = document.querySelector('input');
+                input._x_model.set('foo');
+                fireEvent.click(screen.queryByText('Ok'));
+                expect(await promise).toEqual('foo');
+            });
+        });
+
+        it('cancel', async () => {
+            const promise = Alpine.$prompt('input your name.');
+            await Alpine.nextTick(async () => {
+                const input = document.querySelector('input');
+                input._x_model.set('foo');
+                fireEvent.click(screen.queryByText('Cancel'));
+                expect(await promise).toEqual(false);
+            });
+        });
+    });
 });

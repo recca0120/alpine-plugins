@@ -47,10 +47,13 @@ const html = `
                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
                         </svg>
                     </div>
-                    <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                    <div class="flex-1 mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
                         <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title" x-show="title" x-html="title"></h3>
                         <div class="mt-2">
                             <p class="text-sm text-gray-500" x-show="message" x-html="message"></p>
+                            <template x-if="prompt">
+                                <input x-model="input" type="text" class="mt-2 block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                            </template>
                         </div>
                     </div>
                 </div>
@@ -77,6 +80,8 @@ export default function (Alpine) {
         callback: null,
         title: '',
         message: '',
+        prompt: false,
+        input: '',
         _buttons: [{}],
         get buttons() {
             return this._buttons.map((button) => {
@@ -89,6 +94,8 @@ export default function (Alpine) {
         async show(attributes) {
             this.title = attributes.title ?? '';
             this.message = attributes.message ?? '';
+            this.prompt = attributes.prompt ?? false;
+            this.input = '';
             this._buttons = attributes.buttons ?? [];
 
             this.open = true;
@@ -116,7 +123,7 @@ export default function (Alpine) {
                 buttons: [{
                     class: 'inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto',
                     text: 'Ok',
-                    handle: (instance) => {
+                    handle(instance) {
                         instance.close();
                     },
                 }],
@@ -132,14 +139,37 @@ export default function (Alpine) {
                 buttons: [{
                     class: 'inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto',
                     text: 'Ok',
-                    handle: (instance) => {
+                    handle(instance) {
                         instance.close(true);
                     },
                 }, {
                     class: 'mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto',
                     text: 'Cancel',
-                    handle: (instance) => {
-                        instance.close(false);
+                    handle(instance) {
+                        instance.close();
+                    },
+                }],
+            });
+        },
+    });
+
+    Object.defineProperty(Alpine, '$prompt', {
+        get: () => async (message, attributes) => {
+            return modal.show({
+                ...attributes,
+                message,
+                prompt: true,
+                buttons: [{
+                    class: 'inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto',
+                    text: 'Ok',
+                    handle(instance) {
+                        instance.close(instance.input);
+                    },
+                }, {
+                    class: 'mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto',
+                    text: 'Cancel',
+                    handle(instance) {
+                        instance.close();
                     },
                 }],
             });
