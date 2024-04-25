@@ -119,5 +119,17 @@ describe('Alpine $modal', () => {
                 expect(await promise).toBeFalsy();
             });
         });
+
+        it('prompt input invalid', async () => {
+            const promise = Alpine.$prompt('are you sure?');
+            await Alpine.nextTick(() => {
+                const input = document.querySelector('input');
+                fireEvent.click(screen.queryByText('Ok'));
+            });
+            await Alpine.nextTick(async () => {
+                const input = document.querySelector('input');
+                expect(input.className).toContain('text-red-900');
+            });
+        });
     });
 });
