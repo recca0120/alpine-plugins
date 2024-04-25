@@ -3,9 +3,6 @@ import plugin from '..';
 import { fireEvent, screen } from '@testing-library/dom';
 
 describe('Alpine $modal', () => {
-    const delay = (timeout) => {
-        return new Promise((resolve) => setTimeout(() => resolve(), timeout));
-    };
     beforeAll(() => {
         plugin(Alpine);
         Alpine.start();
@@ -21,15 +18,17 @@ describe('Alpine $modal', () => {
         });
     });
 
-    it('close', async () => {
+    it('close', (done) => {
         Alpine.$alert('');
-        await Alpine.nextTick(async () => {
+        Alpine.nextTick(async () => {
             const dialog = screen.queryByRole('dialog');
             expect(dialog.style.display).toEqual('');
 
             fireEvent.click(dialog.querySelector('button'));
-            await delay(200);
-            expect(dialog.style.display).toEqual('none');
+            setTimeout(() => {
+                expect(dialog.style.display).toEqual('none');
+                done();
+            }, 200);
         });
     });
 
@@ -39,6 +38,19 @@ describe('Alpine $modal', () => {
             await Alpine.nextTick(async () => {
                 const dialog = screen.queryByRole('dialog');
                 expect(dialog.querySelector('[x-html=message]').innerHTML).toEqual(message);
+            });
+        }
+
+        await shouldBe('foo');
+        await shouldBe('bar');
+    });
+
+    it('set title', async () => {
+        async function shouldBe(title) {
+            Alpine.$alert('hello world', title);
+            await Alpine.nextTick(async () => {
+                const dialog = screen.queryByRole('dialog');
+                expect(dialog.querySelector('[x-html=title]').innerHTML).toEqual(title);
             });
         }
 

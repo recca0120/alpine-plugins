@@ -48,9 +48,9 @@ const html = `
                         </svg>
                     </div>
                     <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
-                        <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title">Deactivate account</h3>
+                        <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title" x-show="title" x-html="title"></h3>
                         <div class="mt-2">
-                            <p class="text-sm text-gray-500" x-html="message"></p>
+                            <p class="text-sm text-gray-500" x-show="message" x-html="message"></p>
                         </div>
                     </div>
                 </div>
@@ -71,12 +71,18 @@ export default function (Alpine) {
 
     const modal = Alpine.reactive({
         open: false,
+        title: '',
         message: '',
         show() {
             this.open = true;
         },
         close() {
             this.open = false;
+        },
+        setTitle(title) {
+            this.title = title;
+
+            return this;
         },
         setMessage(message) {
             this.message = message;
@@ -88,8 +94,11 @@ export default function (Alpine) {
     Alpine.data('ModalComponent', () => modal);
 
     Object.defineProperty(Alpine, '$alert', {
-        get: () => (message) => {
-            return modal.setMessage(message).show();
+        get: () => (message, title) => {
+            return modal
+                .setMessage(message)
+                .setTitle(title)
+                .show();
         },
     });
 }
