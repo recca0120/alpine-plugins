@@ -57,4 +57,22 @@ describe('Alpine $modal', () => {
         await shouldBe('foo');
         await shouldBe('bar');
     });
+
+    describe('$confirm', () => {
+        it('ok', async () => {
+            const promise = Alpine.$confirm('are you sure?');
+            await Alpine.nextTick(async () => {
+                fireEvent.click(screen.queryByText('Ok'));
+                expect(await promise).toBeTruthy();
+            });
+        });
+
+        it('cancel', async () => {
+            const promise = Alpine.$confirm('are you sure?');
+            await Alpine.nextTick(async () => {
+                fireEvent.click(screen.queryByText('Cancel'));
+                expect(await promise).toBeFalsy();
+            });
+        });
+    });
 });

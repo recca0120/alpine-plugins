@@ -58,13 +58,14 @@ const html = `
                     <template x-for="button of buttons">
                         <button @click="button.handle()" type="button" :class="button.class" x-html="button.text"></button>
                     </template>
-                    
                 </div>
             </div>
         </div>
     </div>
 </div>
 `;
+const emptyFn = () => {
+};
 export default function (Alpine) {
     const component = document.createElement('div');
     component.setAttribute('x-data', 'ModalComponent');
@@ -79,18 +80,16 @@ export default function (Alpine) {
         _buttons: [{}],
         get buttons() {
             return this._buttons.map((button) => {
-                if (button.handle) {
-                    button.handle = button.handle.bind(this);
-                } else {
-                    button.handle = () => {
-                    };
-                }
+                const handle = button.handle ?? emptyFn;
+                button.handle = () => handle(this);
+
                 return button;
             });
         },
         async show(attributes) {
             this.title = attributes.title ?? '';
             this.message = attributes.message ?? '';
+            this._buttons = attributes.buttons ?? [];
 
             this.open = true;
 
@@ -112,11 +111,35 @@ export default function (Alpine) {
     Object.defineProperty(Alpine, '$alert', {
         get: () => async (message, attributes) => {
             return modal.show({
-                ...attributes, message, buttons: [{
+                ...attributes,
+                message,
+                buttons: [{
                     class: 'inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto',
-                    text: 'OK',
-                    handle: function () {
-                        this.close();
+                    text: 'Ok',
+                    handle: (instance) => {
+                        instance.close();
+                    },
+                }],
+            });
+        },
+    });
+
+    Object.defineProperty(Alpine, '$confirm', {
+        get: () => async (message, attributes) => {
+            return modal.show({
+                ...attributes,
+                message,
+                buttons: [{
+                    class: 'inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto',
+                    text: 'Ok',
+                    handle: (instance) => {
+                        instance.close(true);
+                    },
+                }, {
+                    class: 'mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto',
+                    text: 'Cancel',
+                    handle: (instance) => {
+                        instance.close(false);
                     },
                 }],
             });
