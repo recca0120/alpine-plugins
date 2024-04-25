@@ -91,12 +91,12 @@ export default function (Alpine) {
                 return button;
             });
         },
-        async show(attributes) {
-            this.title = attributes.title ?? '';
-            this.message = attributes.message ?? '';
-            this.prompt = attributes.prompt ?? false;
+        async show(options) {
+            this.title = options.title ?? '';
+            this.message = options.message ?? '';
+            this.prompt = options.prompt ?? false;
             this.input = '';
-            this._buttons = attributes.buttons ?? [];
+            this._buttons = options.buttons ?? [];
 
             this.open = true;
 
@@ -115,64 +115,58 @@ export default function (Alpine) {
 
     Alpine.data('ModalComponent', () => modal);
 
-    Object.defineProperty(Alpine, '$alert', {
-        get: () => async (message, attributes) => {
-            return modal.show({
-                ...attributes,
-                message,
-                buttons: [{
-                    class: 'inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto',
-                    text: 'Ok',
-                    handle(instance) {
-                        instance.close();
-                    },
-                }],
-            });
-        },
-    });
+    const alert = async (message, options) => {
+        return modal.show({
+            ...options, message, buttons: [{
+                class: 'inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto',
+                text: 'Ok',
+                handle(instance) {
+                    instance.close();
+                },
+            }],
+        });
+    };
 
-    Object.defineProperty(Alpine, '$confirm', {
-        get: () => async (message, attributes) => {
-            return modal.show({
-                ...attributes,
-                message,
-                buttons: [{
-                    class: 'inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto',
-                    text: 'Ok',
-                    handle(instance) {
-                        instance.close(true);
-                    },
-                }, {
-                    class: 'mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto',
-                    text: 'Cancel',
-                    handle(instance) {
-                        instance.close();
-                    },
-                }],
-            });
-        },
-    });
+    const confirm = async (message, options) => {
+        return modal.show({
+            ...options, message, buttons: [{
+                class: 'inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto',
+                text: 'Ok',
+                handle(instance) {
+                    instance.close(true);
+                },
+            }, {
+                class: 'mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto',
+                text: 'Cancel',
+                handle(instance) {
+                    instance.close(false);
+                },
+            }],
+        });
 
-    Object.defineProperty(Alpine, '$prompt', {
-        get: () => async (message, attributes) => {
-            return modal.show({
-                ...attributes,
-                message,
-                prompt: true,
-                buttons: [{
-                    class: 'inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto',
-                    text: 'Ok',
-                    handle(instance) {
-                        instance.close(instance.input);
-                    },
-                }, {
-                    class: 'mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto',
-                    text: 'Cancel',
-                    handle(instance) {
-                        instance.close();
-                    },
-                }],
-            });
-        },
-    });
+    };
+    const prompt = async (message, options) => {
+        return modal.show({
+            ...options, message, prompt: true, buttons: [{
+                class: 'inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto',
+                text: 'Ok',
+                handle(instance) {
+                    instance.close(instance.input);
+                },
+            }, {
+                class: 'mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto',
+                text: 'Cancel',
+                handle(instance) {
+                    instance.close();
+                },
+            }],
+        });
+    };
+
+    Alpine.magic('alert', () => alert);
+    Alpine.magic('confirm', () => confirm);
+    Alpine.magic('prompt', () => prompt);
+    Object.defineProperty(Alpine, '$alert', {get: () => alert});
+    Object.defineProperty(Alpine, '$confirm', {get: () => confirm});
+    Object.defineProperty(Alpine, '$prompt', {get: () => prompt});
 }

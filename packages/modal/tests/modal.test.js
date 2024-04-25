@@ -59,41 +59,51 @@ describe('Alpine $modal', () => {
     });
 
     describe('$confirm', () => {
-        it('ok', async () => {
+        it('confirm ok', async () => {
             const promise = Alpine.$confirm('are you sure?');
-            await Alpine.nextTick(async () => {
+            await Alpine.nextTick(() => {
                 fireEvent.click(screen.queryByText('Ok'));
+            });
+
+            await Alpine.nextTick(async () => {
                 expect(await promise).toBeTruthy();
             });
         });
 
-        it('cancel', async () => {
+        it('confirm cancel', async () => {
             const promise = Alpine.$confirm('are you sure?');
-            await Alpine.nextTick(async () => {
+            await Alpine.nextTick(() => {
                 fireEvent.click(screen.queryByText('Cancel'));
+            });
+            await Alpine.nextTick(async () => {
                 expect(await promise).toBeFalsy();
             });
         });
     });
 
     describe('$prompt', () => {
-        it('get prompt', async () => {
-            const promise = Alpine.$prompt('input your name.');
-            await Alpine.nextTick(async () => {
+        it('prompt ok', async () => {
+            const promise = Alpine.$prompt('are you sure?');
+            await Alpine.nextTick(() => {
                 const input = document.querySelector('input');
                 input._x_model.set('foo');
                 fireEvent.click(screen.queryByText('Ok'));
+            });
+            await Alpine.nextTick(async () => {
                 expect(await promise).toEqual('foo');
             });
         });
 
-        it('cancel', async () => {
-            const promise = Alpine.$prompt('input your name.');
-            await Alpine.nextTick(async () => {
+        it('prompt cancel', async () => {
+            const promise = Alpine.$prompt('are you sure?');
+            await Alpine.nextTick(() => {
                 const input = document.querySelector('input');
                 input._x_model.set('foo');
                 fireEvent.click(screen.queryByText('Cancel'));
-                expect(await promise).toEqual(false);
+            });
+
+            await Alpine.nextTick(async () => {
+                expect(await promise).toBeFalsy();
             });
         });
     });
