@@ -1,8 +1,8 @@
 const html = `
 <div 
     x-show="open"
-    @keydown.window.escape.prevent.stop="open = false"
-    @click="close()"
+    @keydown.window.escape.prevent.stop="keyboard ? close() : ''"
+    @click="backdrop ? close() : ''"
     x-id="['modal-title']"
     :aria-labelledby="$id('modal-title')"
     class="relative z-10" 
@@ -117,6 +117,8 @@ export default function (Alpine) {
         message: '',
         prompt: false,
         input: '',
+        backdrop: true,
+        keyboard: true,
         _buttons: [{}],
         get buttons() {
             return this._buttons.map((button) => {
@@ -131,6 +133,8 @@ export default function (Alpine) {
             this.message = options.message ?? '';
             this.prompt = options.prompt ?? false;
             this.input = '';
+            this.backdrop = options.backdrop ?? true;
+            this.keyboard = options.keyboard ?? true;
             this._buttons = options.buttons ?? [];
 
             this.open = true;
@@ -152,19 +156,26 @@ export default function (Alpine) {
 
     const alert = async (message, options) => {
         return modal.show({
-            ...options, message, buttons: [{
+            message,
+            backdrop: false,
+            keyboard: false,
+            buttons: [{
                 class: 'inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto',
                 text: 'Ok',
                 handle(instance) {
                     instance.close();
                 },
             }],
+            ...options,
         });
     };
 
     const confirm = async (message, options) => {
         return modal.show({
-            ...options, message, buttons: [{
+            message,
+            backdrop: false,
+            keyboard: false,
+            buttons: [{
                 class: 'inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto',
                 text: 'Ok',
                 handle(instance) {
@@ -177,12 +188,17 @@ export default function (Alpine) {
                     instance.close(false);
                 },
             }],
+            ...options,
         });
 
     };
     const prompt = async (message, options) => {
         return modal.show({
-            ...options, message, prompt: true, buttons: [{
+            message,
+            prompt: true,
+            backdrop: false,
+            keyboard: false,
+            buttons: [{
                 class: 'inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-500 sm:ml-3 sm:w-auto',
                 text: 'Ok',
                 handle(instance) {
@@ -195,6 +211,7 @@ export default function (Alpine) {
                     instance.close();
                 },
             }],
+            ...options,
         });
     };
 
