@@ -102,8 +102,16 @@ class UrlWindow {
     }
 }
 
+export default function (Alpine) {
+    let defaultTemplate = 'tailwind';
+    const templates = {tailwind: tailwind()};
+    const render = (expression, template) => templates[template ?? defaultTemplate].replace('{expression}', `PaginationComponent(${expression})`);
 
-export default function (Alpine, template = tailwind) {
+    Alpine.directive('pagination', (el, {expression}, {evaluateLater, effect}) => {
+        const evaluator = evaluateLater(expression);
+        effect(() => evaluator(value => el.innerHTML = render(JSON.stringify(value), value.template)));
+    });
+
     Alpine.data('PaginationComponent', (options) => {
         return {
             total: options.total ?? 0,
@@ -185,21 +193,16 @@ export default function (Alpine, template = tailwind) {
         };
     });
 
-    const getTemplate = (selector) => {
-        if (selector) {
-            try {
-                return document.querySelector(selector).innerHTML;
-            } catch (e) {
-                console.error(e);
-            }
-        }
+    return {
+        use(name) {
+            defaultTemplate = name;
 
-        return template instanceof Function ? template() : template;
+            return this;
+        },
+        template(name, html) {
+            templates[name] = html instanceof Function ? html() : html;
+
+            return this;
+        },
     };
-    const render = (expression, html) => html.replace('{expression}', `PaginationComponent(${expression})`);
-
-    Alpine.directive('pagination', (el, {expression}, {evaluateLater, effect}) => {
-        const evaluator = evaluateLater(expression);
-        effect(() => evaluator(value => el.innerHTML = render(JSON.stringify(value), getTemplate(value.template))));
-    });
 }

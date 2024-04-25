@@ -56,7 +56,7 @@
     <div x-data="{pagination: {
         current_page: 5,
         total: 1000,
-        // template: '#bootstrap5',
+        // template: 'bootstrap5',
     }}" @change="pagination.current_page = event.detail">
         <div x-pagination="pagination"></div>
     </div>
@@ -72,13 +72,7 @@
     const MockAdapter = window.AxiosMockAdapter;
 
     errors(Alpine);
-    pagination(Alpine);
-
-    const template = document.createElement('script');
-    template.id = 'bootstrap5';
-    template.type = 'text/template';
-    template.innerHTML = bootstrap5();
-    document.body.appendChild(template);
+    pagination(Alpine).template('bootstrap5', bootstrap5);
 
     Alpine.$errors.registerAxiosInterceptor(axios);
 
