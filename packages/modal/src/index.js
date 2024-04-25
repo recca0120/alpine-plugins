@@ -93,6 +93,17 @@ const html = `
 `;
 const emptyFn = () => {
 };
+
+const deferred = () => {
+    let resolve;
+    let reject;
+    const promise = new Promise((_resolve, _reject) => {
+        resolve = _resolve;
+        reject = _reject;
+    });
+
+    return {promise, reject, resolve};
+};
 export default function (Alpine) {
     const component = document.createElement('div');
     component.setAttribute('x-data', 'ModalComponent');
@@ -100,8 +111,8 @@ export default function (Alpine) {
     document.body.appendChild(component);
 
     const modal = Alpine.reactive({
+        deferred: null,
         open: false,
-        callback: null,
         title: '',
         message: '',
         prompt: false,
@@ -124,14 +135,14 @@ export default function (Alpine) {
 
             this.open = true;
 
-            return new Promise((resolve) => {
-                this.callback = (result) => resolve(result);
-            });
+            this.deferred = deferred();
+
+            return this.deferred.promise;
         },
         close(result = undefined) {
-            if (this.callback instanceof Function) {
-                this.callback(result);
-                this.callback = null;
+            if (this.deferred) {
+                this.deferred.resolve(result);
+                this.deferred = null;
             }
             this.open = false;
         },
