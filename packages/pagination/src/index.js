@@ -103,13 +103,27 @@ class UrlWindow {
 }
 
 export default function (Alpine) {
-    let defaultTemplate = 'tailwind';
+    let i18n = {
+        'Pagination Navigation': 'Pagination Navigation',
+        'pagination.previous': '&laquo; Previous',
+        'pagination.next': 'Next &raquo;',
+        'Go to page :page': 'Go to page :page',
+        'Showing': 'Showing',
+        'from': 'from',
+        'to': 'to',
+        'of': 'of',
+        'results': 'results',
+    };
     const templates = {tailwind: tailwind()};
-    const render = (expression, template) => templates[template ?? defaultTemplate].replace('{expression}', `PaginationComponent(${expression})`);
+
+    let defaults = 'tailwind';
+    const render = (value) => templates[value.template ?? defaults].replace(
+        '{expression}', `PaginationComponent(${JSON.stringify(value)})`,
+    );
 
     Alpine.directive('pagination', (el, {expression}, {evaluateLater, effect}) => {
         const evaluator = evaluateLater(expression);
-        effect(() => evaluator(value => el.innerHTML = render(JSON.stringify(value), value.template)));
+        effect(() => evaluator(value => el.innerHTML = render(value)));
     });
 
     Alpine.data('PaginationComponent', (options) => {
@@ -161,25 +175,13 @@ export default function (Alpine) {
                     return elements.concat(items instanceof String ? [items] : items);
                 }, []);
             },
-            __(key, parameters = {}) {
-                const lookup = {
-                    'Pagination Navigation': 'Pagination Navigation',
-                    'pagination.previous': '&laquo; Previous',
-                    'pagination.next': 'Next &raquo;',
-                    'Go to page :page': 'Go to page :page',
-                    'Showing': 'Showing',
-                    'from': 'from',
-                    'to': 'to',
-                    'of': 'of',
-                    'results': 'results',
-                };
-
-                return Object.entries(parameters).reduce((text, [key, value]) => text.replace(`:${key}`, value), lookup[key]);
-            },
             change(page) {
                 if (page !== '...') {
                     this.$dispatch('change', page);
                 }
+            },
+            __(key, parameters = {}) {
+                return Object.entries(parameters).reduce((text, [key, value]) => text.replace(`:${key}`, value), i18n[key]);
             },
             /** @returns {number[]} */
             getUrlRange(start, stop, step = 1) {
@@ -195,7 +197,7 @@ export default function (Alpine) {
 
     return {
         use(name) {
-            defaultTemplate = name;
+            defaults = name;
 
             return this;
         },
@@ -203,6 +205,13 @@ export default function (Alpine) {
             templates[name] = html instanceof Function ? html() : html;
 
             return this;
+        },
+        i18n(key, value) {
+            if (typeof key === 'object') {
+                i18n = {...i18n, ...key};
+            } else {
+                i18n[key] = value;
+            }
         },
     };
 }
