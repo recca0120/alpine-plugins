@@ -14,7 +14,7 @@ describe('Alpine $modal', () => {
     afterAll(() => Alpine.stopObservingMutations());
 
     it('show', async () => {
-        Alpine.$alert();
+        Alpine.$alert('');
         await Alpine.nextTick(() => {
             const dialog = screen.queryByRole('dialog');
             expect(dialog.style.display).toEqual('');
@@ -22,7 +22,7 @@ describe('Alpine $modal', () => {
     });
 
     it('close', async () => {
-        Alpine.$alert();
+        Alpine.$alert('');
         await Alpine.nextTick(async () => {
             const dialog = screen.queryByRole('dialog');
             expect(dialog.style.display).toEqual('');
@@ -31,5 +31,18 @@ describe('Alpine $modal', () => {
             await delay(200);
             expect(dialog.style.display).toEqual('none');
         });
+    });
+
+    it('set message', async () => {
+        async function shouldBe(message) {
+            Alpine.$alert(message);
+            await Alpine.nextTick(async () => {
+                const dialog = screen.queryByRole('dialog');
+                expect(dialog.querySelector('[x-html=message]').innerHTML).toEqual(message);
+            });
+        }
+
+        await shouldBe('foo');
+        await shouldBe('bar');
     });
 });
