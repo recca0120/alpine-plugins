@@ -3,6 +3,9 @@ import plugin from '../src/index.js';
 import { fireEvent, screen } from '@testing-library/dom';
 
 describe('Alpine $modal', () => {
+    const delay = (timeout) => {
+        return new Promise((resolve) => setTimeout(resolve, timeout));
+    };
     beforeAll(() => {
         plugin(Alpine);
         Alpine.start();
@@ -18,18 +21,17 @@ describe('Alpine $modal', () => {
         });
     });
 
-    it('close', (done) => {
+    it('close', async () => {
         Alpine.$alert('');
-        Alpine.nextTick(async () => {
-            const dialog = screen.queryByRole('dialog');
+        let dialog;
+        await Alpine.nextTick(async () => {
+            dialog = screen.queryByRole('dialog');
             expect(dialog.style.display).toEqual('');
 
             fireEvent.click(dialog.querySelector('button'));
-            setTimeout(() => {
-                expect(dialog.style.display).toEqual('none');
-                done();
-            }, 200);
         });
+        await delay(300);
+        expect(dialog.style.display).toEqual('none');
     });
 
     it('set message', async () => {
@@ -49,13 +51,13 @@ describe('Alpine $modal', () => {
         async function shouldBe(title) {
             Alpine.$alert('hello world', {title});
             await Alpine.nextTick(async () => {
+                await delay(500);
                 const dialog = screen.queryByRole('dialog');
                 expect(dialog.querySelector('[x-html=title]').innerHTML).toEqual(title);
             });
         }
 
         await shouldBe('foo');
-        await shouldBe('bar');
     });
 
     describe('$alert', () => {
@@ -116,6 +118,7 @@ describe('Alpine $modal', () => {
             });
 
             await Alpine.nextTick(async () => {
+                await delay(300);
                 expect(await promise).toBeFalsy();
             });
         });

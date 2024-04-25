@@ -1,13 +1,12 @@
 const html = `
-<div 
-    x-show="open"
-    @keydown.window.escape.prevent.stop="keyboard ? close() : ''"
-    @click="backdrop ? close() : ''"
-    x-id="['modal-title']"
-    :aria-labelledby="$id('modal-title')"
-    class="relative z-10" 
-    role="dialog" 
-    aria-modal="true"
+<div x-show="open"
+     @keydown.window.escape.prevent.stop="keyboard ? close() : ''"
+     @click="backdrop ? close() : ''"
+     x-id="['modal-title']"
+     :aria-labelledby="$id('modal-title')"
+     class="relative z-10" 
+     role="dialog" 
+     aria-modal="true"
 >
     <!--
         Background backdrop, show/hide based on modal state.
@@ -142,19 +141,22 @@ export default function (Alpine) {
             this.backdrop = options.backdrop ?? true;
             this.keyboard = options.keyboard ?? true;
             this._buttons = options.buttons ?? [];
-
             this.open = true;
-
             this.deferred = deferred();
 
             return this.deferred.promise;
         },
-        close(result = undefined) {
-            if (this.deferred) {
-                this.deferred.resolve(result);
-                this.deferred = null;
-            }
-            this.open = false;
+        async close(result = undefined) {
+            return new Promise(resolve => {
+                this.open = false;
+                setTimeout(() => {
+                    if (this.deferred) {
+                        this.deferred.resolve(result);
+                        this.deferred = null;
+                    }
+                    resolve();
+                }, 250);
+            });
         },
     });
 
