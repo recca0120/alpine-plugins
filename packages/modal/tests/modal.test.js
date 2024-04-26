@@ -3,10 +3,6 @@ import plugin from '../src/index.js';
 import { fireEvent, screen } from '@testing-library/dom';
 
 describe('Alpine $modal', () => {
-    const delay = (timeout) => {
-        return new Promise((resolve) => setTimeout(resolve, timeout));
-    };
-
     beforeAll(() => {
         plugin(Alpine);
         Alpine.start();
@@ -18,7 +14,7 @@ describe('Alpine $modal', () => {
         Alpine.$alert('');
         await Alpine.nextTick(() => {
             const dialog = screen.queryByRole('dialog');
-            expect(dialog.style.display).toEqual('');
+            shouldBeDisplayed(dialog);
         });
     });
 
@@ -27,12 +23,12 @@ describe('Alpine $modal', () => {
         let dialog;
         await Alpine.nextTick(async () => {
             dialog = screen.queryByRole('dialog');
-            expect(dialog.style.display).toEqual('');
+            shouldBeDisplayed(dialog);
 
             fireEvent.click(dialog.querySelector('button'));
         });
         await delay(300);
-        expect(dialog.style.display).toEqual('none');
+        shouldBeHidden(dialog);
     });
 
     it('set message', async () => {
@@ -59,6 +55,13 @@ describe('Alpine $modal', () => {
         }
 
         await shouldBe('foo');
+    });
+
+    it('show close button', async () => {
+        Alpine.$modal.show({ showCloseButton: true });
+        await Alpine.nextTick(async () => {
+            shouldBeDisplayed(document.querySelector('[x-show=showCloseButton]'));
+        });
     });
 
     describe('$alert', () => {
@@ -106,6 +109,7 @@ describe('Alpine $modal', () => {
                 fireEvent.click(screen.queryByText('Ok'));
             });
             await Alpine.nextTick(async () => {
+                await delay(300);
                 expect(await promise).toEqual('foo');
             });
         });
@@ -136,4 +140,16 @@ describe('Alpine $modal', () => {
             });
         });
     });
+
+    const delay = (timeout) => {
+        return new Promise((resolve) => setTimeout(resolve, timeout));
+    };
+
+    const shouldBeDisplayed = element => {
+        expect(element.style.display).toEqual('');
+    };
+
+    const shouldBeHidden = element => {
+        expect(element.style.display).toEqual('none');
+    };
 });

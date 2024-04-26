@@ -49,6 +49,7 @@ class Modal {
     title = '';
     message = '';
     isPrompt = false;
+    showCloseButton = false;
     input = '';
     invalid = false;
     backdrop = true;
@@ -84,6 +85,7 @@ class Modal {
         this.title = options.title ?? '';
         this.message = options.message ?? '';
         this.isPrompt = options.isPrompt ?? false;
+        this.showCloseButton = options.showCloseButton ?? false;
         this.input = '';
         this.invalid = false;
         this.backdrop = options.backdrop ?? true;
@@ -120,6 +122,7 @@ class Modal {
             message,
             backdrop: this.defaults.alert.backdrop,
             keyboard: this.defaults.alert.keyboard,
+            showCloseButton: this.defaults.alert.showCloseButton,
             buttons: [{
                 className: classes.primary,
                 text: this.__('alert.ok'),
@@ -138,6 +141,7 @@ class Modal {
             message,
             backdrop: this.defaults.confirm.backdrop,
             keyboard: this.defaults.confirm.keyboard,
+            showCloseButton: this.defaults.confirm.showCloseButton,
             buttons: [{
                 className: classes.primary,
                 text: this.__('confirm.ok'),
@@ -162,6 +166,7 @@ class Modal {
             isPrompt: true,
             backdrop: this.defaults.prompt.backdrop,
             keyboard: this.defaults.prompt.keyboard,
+            showCloseButton: this.defaults.prompt.showCloseButton,
             buttons: [{
                 className: classes.primary,
                 text: this.__('prompt.ok'),
@@ -191,9 +196,9 @@ export default function (Alpine, defaults = {}) {
     defaults = Alpine.reactive(mergeDeep({
         theme: 'tailwind',
         themes: { tailwind: tailwind() },
-        alert: { backdrop: false, keyboard: false },
-        confirm: { backdrop: false, keyboard: false },
-        prompt: { backdrop: false, keyboard: false },
+        alert: { backdrop: false, keyboard: false, showCloseButton: false },
+        confirm: { backdrop: false, keyboard: false, showCloseButton: false },
+        prompt: { backdrop: false, keyboard: false, showCloseButton: false },
         i18n: {
             'alert.ok': 'Ok',
             'confirm.ok': 'Ok',

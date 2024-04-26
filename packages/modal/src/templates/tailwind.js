@@ -50,7 +50,7 @@ export const template = `
                  x-transition:leave-end="opacity-0"
                  class="flex-1 relative transform overflow-hidden rounded-lg bg-white px-4 pb-4 pt-5 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg sm:p-6"
              >
-                <div class="absolute right-0 top-0 hidden pr-4 pt-4 sm:block" x-show="false">
+                <div class="absolute right-0 top-0 hidden pr-4 pt-4 sm:block" x-show="showCloseButton">
                     <button @click="close()" type="button" class="rounded-md bg-white text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
                         <span class="sr-only">Close</span>
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" aria-hidden="true">
