@@ -9,7 +9,7 @@
     <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
 </head>
 <body>
-<div class="container mx-auto p-5">
+<div class="container mx-auto p-5 prose max-w-max">
     <div x-data class="mb-10">
         <h2 class="mb-2">Errors</h2>
 
@@ -67,14 +67,14 @@
 
         <button type="button"
                 class="rounded-md bg-indigo-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
-                @click="$alert(await $confirm('are you sure ?', {title: 'Confirm'}), {title: 'Result'})"
+                @click="$alert(new String(await $confirm('are you sure ?', {title: 'Confirm'})), {title: 'Result'})"
         >
             Confirm
         </button>
 
         <button type="button"
                 class="rounded-md bg-indigo-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
-                @click="$alert(await $prompt('please input your email.', {title: 'Prompt'}), {title: 'Result'})"
+                @click="$alert(new String(await $prompt('please input your email.', {title: 'Prompt'})), {title: 'Result'})"
         >
             Prompt
         </button>

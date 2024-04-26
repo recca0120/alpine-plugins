@@ -2,6 +2,36 @@ export * from './templates/tailwind.js';
 export * from './templates/bootstrap5.js';
 import { tailwind } from './templates/tailwind.js';
 
+/**
+ * Performs a deep merge of objects and returns new object. Does not modify
+ * objects (immutable) and merges arrays via concatenation.
+ *
+ * @param {...object} objects - Objects to merge
+ * @returns {object} New object with merged key/values
+ */
+function mergeDeep(...objects) {
+    const isObject = obj => obj && typeof obj === 'object';
+
+    return objects.reduce((prev, obj) => {
+        Object.keys(obj).forEach(key => {
+            const pVal = prev[key];
+            const oVal = obj[key];
+
+            if (Array.isArray(pVal) && Array.isArray(oVal)) {
+                prev[key] = pVal.concat(...oVal);
+            }
+            else if (isObject(pVal) && isObject(oVal)) {
+                prev[key] = mergeDeep(pVal, oVal);
+            }
+            else {
+                prev[key] = oVal;
+            }
+        });
+
+        return prev;
+    }, {});
+}
+
 class UrlWindow {
     constructor(paginator) {
         this.paginator = paginator;
@@ -194,7 +224,7 @@ class Paginator {
 }
 
 export default function (Alpine, defaults = {}) {
-    defaults = Alpine.reactive({
+    defaults = Alpine.reactive(mergeDeep({
         views: {
             _default: 'tailwind',
             templates: { tailwind: tailwind() },
@@ -210,8 +240,7 @@ export default function (Alpine, defaults = {}) {
             'of': 'of',
             'results': 'results',
         },
-        ...defaults,
-    });
+    }, defaults));
 
     const render = (value) => defaults.views.templates[value.template ?? defaults.views._default].template.replace(
         '{expression}', `PaginationComponent(${JSON.stringify(value)})`,
