@@ -65,8 +65,8 @@ class Modal {
         return this._buttons.map((button) => {
             const handle = button.handle ?? emptyFn;
             button.handle = () => handle(this);
-            if (!button.hasOwnProperty('class')) {
-                button.class = classes.secondary;
+            if (!button.hasOwnProperty('className')) {
+                button.className = classes.secondary;
             }
 
             return button;
@@ -121,7 +121,7 @@ class Modal {
             backdrop: this.defaults.alert.backdrop,
             keyboard: this.defaults.alert.keyboard,
             buttons: [{
-                class: classes.primary,
+                className: classes.primary,
                 text: this.__('alert.ok'),
                 handle(instance) {
                     instance.close();
@@ -139,7 +139,7 @@ class Modal {
             backdrop: this.defaults.confirm.backdrop,
             keyboard: this.defaults.confirm.keyboard,
             buttons: [{
-                class: classes.primary,
+                className: classes.primary,
                 text: this.__('confirm.ok'),
                 handle(instance) {
                     instance.close(true);
@@ -163,7 +163,7 @@ class Modal {
             backdrop: this.defaults.prompt.backdrop,
             keyboard: this.defaults.prompt.keyboard,
             buttons: [{
-                class: classes.primary,
+                className: classes.primary,
                 text: this.__('prompt.ok'),
                 handle(instance) {
                     if (!instance.input) {
