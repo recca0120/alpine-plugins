@@ -80,7 +80,7 @@ class Modal {
         return matched ? Math.max(parseInt(matched[1], 10), 0) : 0;
     }
 
-    async show(options) {
+    async show(options = {}) {
         this.title = options.title ?? '';
         this.message = options.message ?? '';
         this.isPrompt = options.isPrompt ?? false;
@@ -205,20 +205,41 @@ export default function (Alpine, defaults = {}) {
         },
     }, defaults));
 
-    const component = document.createElement('div');
-    component.setAttribute('x-data', 'ModalComponent');
-    component.innerHTML = defaults.views.templates[defaults.views._default].template;
-    document.body.appendChild(component);
+    const instance = (name = '') => {
+        const id = ['ModalComponent', name].filter(v => !!v).join('_');
 
-    const modal = Alpine.reactive(new Modal(defaults));
-    Alpine.data('ModalComponent', () => modal);
+        let component = document.querySelector(`[x-modal=${id}]`);
+        if (component) {
+            return component.x_modal;
+        }
 
-    Alpine.magic('modal', () => modal.show.bind(modal));
+        component = document.createElement('div');
+        component.setAttribute('x-data', '');
+        component.setAttribute('x-modal', id);
+        component.x_modal = Alpine.reactive(new Modal(defaults));
+        document.body.appendChild(component);
+
+        Alpine.data(id, () => component.x_modal);
+
+        return component.x_modal;
+    };
+
+    const modal = instance();
+    Object.defineProperty(modal, 'instance', { get: () => instance });
+    Alpine.magic('modal', () => modal.bind(modal));
     Alpine.magic('alert', () => modal.alert.bind(modal));
     Alpine.magic('confirm', () => modal.confirm.bind(modal));
     Alpine.magic('prompt', () => modal.prompt.bind(modal));
-    Object.defineProperty(Alpine, '$modal', { get: () => modal.show.bind(modal) });
+    Object.defineProperty(Alpine, '$modal', { get: () => modal });
     Object.defineProperty(Alpine, '$alert', { get: () => modal.alert.bind(modal) });
     Object.defineProperty(Alpine, '$confirm', { get: () => modal.confirm.bind(modal) });
     Object.defineProperty(Alpine, '$prompt', { get: () => modal.prompt.bind(modal) });
+
+    const render = (value) => defaults.views.templates[defaults.views._default].template.replace(
+        '{expression}', value,
+    );
+
+    Alpine.directive('modal', (el, { expression }, { effect }) => {
+        effect(() => el.innerHTML = render(expression));
+    });
 }

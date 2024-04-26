@@ -19,11 +19,9 @@ function mergeDeep(...objects) {
 
             if (Array.isArray(pVal) && Array.isArray(oVal)) {
                 prev[key] = pVal.concat(...oVal);
-            }
-            else if (isObject(pVal) && isObject(oVal)) {
+            } else if (isObject(pVal) && isObject(oVal)) {
                 prev[key] = mergeDeep(pVal, oVal);
-            }
-            else {
+            } else {
                 prev[key] = oVal;
             }
         });
@@ -242,6 +240,8 @@ export default function (Alpine, defaults = {}) {
         },
     }, defaults));
 
+    Alpine.data('PaginationComponent', (options) => new Paginator(options, defaults));
+
     const render = (value) => defaults.views.templates[value.template ?? defaults.views._default].template.replace(
         '{expression}', `PaginationComponent(${JSON.stringify(value)})`,
     );
@@ -250,8 +250,6 @@ export default function (Alpine, defaults = {}) {
         const evaluator = evaluateLater(expression);
         effect(() => evaluator(value => el.innerHTML = render(value)));
     });
-
-    Alpine.data('PaginationComponent', (options) => new Paginator(options, defaults));
 
     return {
         use(name) {
