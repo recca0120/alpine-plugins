@@ -75,6 +75,10 @@ class Modal {
         });
     }
 
+    get currentTheme() {
+        return this.defaults.themes[this.defaults.theme];
+    }
+
     get duration() {
         const duration = this?.$root.querySelector('[x-transition\\:leave]');
         const matched = duration?._x_transition?.leave.during.match(/duration-(\d+)/);
@@ -91,7 +95,11 @@ class Modal {
         this.invalid = false;
         this.backdrop = options.backdrop ?? true;
         this.keyboard = options.keyboard ?? true;
-        this._buttons = options.buttons ?? [];
+        this._buttons = options.buttons ?? [{
+            className: this.currentTheme.classes.primary,
+            text: this.__('alert.ok'),
+            handle: (event, instance) => instance.close(),
+        }];
         this.open = true;
         this.deferred = deferred();
 
@@ -117,7 +125,7 @@ class Modal {
     }
 
     async alert(message, options) {
-        const { classes } = this.defaults.themes[this.defaults.theme];
+        const { classes } = this.currentTheme;
 
         return this.show({
             message,
@@ -136,7 +144,7 @@ class Modal {
     };
 
     async confirm(message, options) {
-        const { classes } = this.defaults.themes[this.defaults.theme];
+        const { classes } = this.currentTheme;
 
         return this.show({
             message,
@@ -160,7 +168,7 @@ class Modal {
     };
 
     async prompt(message, options) {
-        const { classes } = this.defaults.themes[this.defaults.theme];
+        const { classes } = this.currentTheme;
 
         return this.show({
             message,
@@ -240,8 +248,5 @@ export default function (Alpine, defaults = {}) {
     Object.defineProperty(Alpine, '$prompt', { get: () => modal.prompt.bind(modal) });
 
     const render = () => defaults.themes[defaults.theme].template;
-
-    Alpine.directive('modal', (el) => {
-        el.innerHTML = render();
-    });
+    Alpine.directive('modal', (el) => el.innerHTML = render());
 }
