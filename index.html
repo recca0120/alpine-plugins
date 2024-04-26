@@ -6,14 +6,14 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Demo</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
 </head>
 <body>
-<div class="container mx-auto p-5 prose max-w-max">
+<div class="container mx-auto p-5">
     <div x-data class="mb-10">
-        <h2 class="mb-2">Errors</h2>
+        <h2 class="mb-3 text-2xl">Errors</h2>
 
-        <div class="mb-5">
+        <div class="mb-2">
             <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email</label>
             <div class="relative mt-2 rounded-md shadow-sm">
                 <input type="email" name="email" id="email"
@@ -55,8 +55,8 @@
         </div>
     </div>
 
-    <div x-data class="mt-5">
-        <h2 class="mb-2">Dialog</h2>
+    <div x-data class="mb-10">
+        <h2 class="mb-3 text-2xl">Dialog</h2>
 
         <button type="button"
                 class="rounded-md bg-indigo-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
@@ -83,9 +83,9 @@
     <div x-data="{pagination: {
         current_page: 5,
         total: 1000,
-        // template: 'bootstrap5',
+        // theme: 'bootstrap5',
     }}" @change="pagination.current_page = event.detail" class="mt-5">
-        <h2 class="mb-2">Pagination</h2>
+        <h2 class="mb-3 text-2xl">Pagination</h2>
 
         <div x-pagination="pagination"></div>
     </div>
@@ -102,7 +102,7 @@
     const MockAdapter = window.AxiosMockAdapter;
 
     errors(Alpine);
-    pagination(Alpine).template('bootstrap5', bootstrap5);
+    pagination(Alpine).setTheme('bootstrap5', bootstrap5);
     modal(Alpine);
 
     Alpine.$errors.registerAxiosInterceptor(axios);

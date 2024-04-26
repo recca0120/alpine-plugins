@@ -60,7 +60,7 @@ class Modal {
     }
 
     get buttons() {
-        const { classes } = this.defaults.views.templates[this.defaults.views._default];
+        const { classes } = this.defaults.themes[this.defaults.theme];
 
         return this._buttons.map((button) => {
             const handle = button.handle ?? emptyFn;
@@ -114,12 +114,12 @@ class Modal {
     }
 
     async alert(message, options) {
-        const { classes } = this.defaults.views.templates[this.defaults.views._default];
+        const { classes } = this.defaults.themes[this.defaults.theme];
 
         return this.show({
             message,
-            backdrop: this.defaults.views.alert.backdrop,
-            keyboard: this.defaults.views.alert.keyboard,
+            backdrop: this.defaults.alert.backdrop,
+            keyboard: this.defaults.alert.keyboard,
             buttons: [{
                 class: classes.primary,
                 text: this.__('alert.ok'),
@@ -132,12 +132,12 @@ class Modal {
     };
 
     async confirm(message, options) {
-        const { classes } = this.defaults.views.templates[this.defaults.views._default];
+        const { classes } = this.defaults.themes[this.defaults.theme];
 
         return this.show({
             message,
-            backdrop: this.defaults.views.confirm.backdrop,
-            keyboard: this.defaults.views.confirm.keyboard,
+            backdrop: this.defaults.confirm.backdrop,
+            keyboard: this.defaults.confirm.keyboard,
             buttons: [{
                 class: classes.primary,
                 text: this.__('confirm.ok'),
@@ -155,13 +155,13 @@ class Modal {
     };
 
     async prompt(message, options) {
-        const { classes } = this.defaults.views.templates[this.defaults.views._default];
+        const { classes } = this.defaults.themes[this.defaults.theme];
 
         return this.show({
             message,
             isPrompt: true,
-            backdrop: this.defaults.views.prompt.backdrop,
-            keyboard: this.defaults.views.prompt.keyboard,
+            backdrop: this.defaults.prompt.backdrop,
+            keyboard: this.defaults.prompt.keyboard,
             buttons: [{
                 class: classes.primary,
                 text: this.__('prompt.ok'),
@@ -189,13 +189,11 @@ class Modal {
 
 export default function (Alpine, defaults = {}) {
     defaults = Alpine.reactive(mergeDeep({
-        views: {
-            _default: 'tailwind',
-            templates: { tailwind: tailwind() },
-            alert: { backdrop: false, keyboard: false },
-            confirm: { backdrop: false, keyboard: false },
-            prompt: { backdrop: false, keyboard: false },
-        },
+        theme: 'tailwind',
+        themes: { tailwind: tailwind() },
+        alert: { backdrop: false, keyboard: false },
+        confirm: { backdrop: false, keyboard: false },
+        prompt: { backdrop: false, keyboard: false },
         i18n: {
             'alert.ok': 'Ok',
             'confirm.ok': 'Ok',
@@ -214,8 +212,8 @@ export default function (Alpine, defaults = {}) {
         }
 
         component = document.createElement('div');
-        component.setAttribute('x-data', '');
-        component.setAttribute('x-modal', id);
+        component.setAttribute('x-data', id);
+        component.setAttribute('x-modal', '');
         component.x_modal = Alpine.reactive(new Modal(defaults));
         document.body.appendChild(component);
 
@@ -235,11 +233,9 @@ export default function (Alpine, defaults = {}) {
     Object.defineProperty(Alpine, '$confirm', { get: () => modal.confirm.bind(modal) });
     Object.defineProperty(Alpine, '$prompt', { get: () => modal.prompt.bind(modal) });
 
-    const render = (value) => defaults.views.templates[defaults.views._default].template.replace(
-        '{expression}', value,
-    );
+    const render = () => defaults.themes[defaults.theme].template;
 
-    Alpine.directive('modal', (el, { expression }, { effect }) => {
-        effect(() => el.innerHTML = render(expression));
+    Alpine.directive('modal', (el) => {
+        el.innerHTML = render();
     });
 }

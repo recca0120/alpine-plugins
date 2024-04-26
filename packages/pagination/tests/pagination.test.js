@@ -38,7 +38,7 @@ describe('Alpine pagination directive', () => {
     };
 
     beforeAll(() => {
-        plugin(Alpine).template('bootstrap5', bootstrap5);
+        plugin(Alpine).setTheme('bootstrap5', bootstrap5);
         Alpine.start();
     });
 
@@ -134,7 +134,7 @@ describe('Alpine pagination directive', () => {
     });
 
     it('render bootstrap5', async () => {
-        givenComponent({ current_page: 1, per_page: 10, total: 5, template: 'bootstrap5' });
+        givenComponent({ current_page: 1, per_page: 10, total: 5, theme: 'bootstrap5' });
 
         await Alpine.nextTick(() => {
             const pagination = screen.getByRole('pagination');
