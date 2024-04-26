@@ -1,5 +1,5 @@
-export { tailwind } from './templates/tailwind.js';
-import { tailwind } from './templates/tailwind.js';
+export { tailwind } from './themes/tailwind.js';
+import { tailwind } from './themes/tailwind.js';
 
 /**
  * Performs a deep merge of objects and returns new object. Does not modify

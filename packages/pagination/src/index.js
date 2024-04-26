@@ -1,6 +1,6 @@
-export * from './templates/tailwind.js';
-export * from './templates/bootstrap5.js';
-import { tailwind } from './templates/tailwind.js';
+export * from './themes/tailwind.js';
+export * from './themes/bootstrap5.js';
+import { tailwind } from './themes/tailwind.js';
 
 /**
  * Performs a deep merge of objects and returns new object. Does not modify
