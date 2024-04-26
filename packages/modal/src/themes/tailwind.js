@@ -87,7 +87,7 @@ export const template = `
                 </div>
                 <div class="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
                     <template x-for="button of buttons">
-                        <button @click="button.handle()" type="button" :class="button.className" x-html="button.text"></button>
+                        <button @click="button.handle" type="button" :class="button.className" x-html="button.text"></button>
                     </template>
                 </div>
             </div>

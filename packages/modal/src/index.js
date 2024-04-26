@@ -62,10 +62,11 @@ class Modal {
 
     get buttons() {
         const { classes } = this.defaults.themes[this.defaults.theme];
+        const self = this;
 
         return this._buttons.map((button) => {
             const handle = button.handle ?? emptyFn;
-            button.handle = () => handle(this);
+            button.handle = (event) => handle.call(self, event, self);
             if (!button.hasOwnProperty('className')) {
                 button.className = classes.secondary;
             }
@@ -126,7 +127,7 @@ class Modal {
             buttons: [{
                 className: classes.primary,
                 text: this.__('alert.ok'),
-                handle(instance) {
+                handle(_event, instance) {
                     instance.close();
                 },
             }],
@@ -145,13 +146,13 @@ class Modal {
             buttons: [{
                 className: classes.primary,
                 text: this.__('confirm.ok'),
-                handle(instance) {
+                handle(_event, instance) {
                     instance.close(true);
                 },
             }, {
                 text: this.__('confirm.cancel'),
-                handle(instance) {
-                    instance.close(false);
+                handle(_event, instance) {
+                    instance.close(true);
                 },
             }],
             ...options,
@@ -170,7 +171,7 @@ class Modal {
             buttons: [{
                 className: classes.primary,
                 text: this.__('prompt.ok'),
-                handle(instance) {
+                handle(_event, instance) {
                     if (!instance.input) {
                         instance.invalid = true;
                     } else {
@@ -179,7 +180,7 @@ class Modal {
                 },
             }, {
                 text: this.__('prompt.cancel'),
-                handle(instance) {
+                handle(_event, instance) {
                     instance.close();
                 },
             }],
