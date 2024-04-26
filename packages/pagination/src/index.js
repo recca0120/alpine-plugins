@@ -171,13 +171,11 @@ class Paginator {
     }
 
     change(page) {
-        if (page !== '...') {
-            this.$dispatch('change', page);
-        }
-    }
+        const dispatch = this.$dispatch;
 
-    __(key, parameters = {}) {
-        return Object.entries(parameters).reduce((text, [key, value]) => text.replace(`:${key}`, value), this.defaults.i18n[key]);
+        if (dispatch && page !== '...') {
+            dispatch('change', page);
+        }
     }
 
     /** @returns {number[]} */
@@ -189,11 +187,18 @@ class Paginator {
 
         return range;
     }
+
+    __(key, parameters = {}) {
+        return Object.entries(parameters).reduce((text, [key, value]) => text.replace(`:${key}`, value), this.defaults.i18n[key]);
+    }
 }
 
 export default function (Alpine, defaults = {}) {
-    const { views } = tailwind();
     defaults = Alpine.reactive({
+        views: {
+            _default: 'tailwind',
+            templates: { tailwind: tailwind() },
+        },
         i18n: {
             'Pagination Navigation': 'Pagination Navigation',
             'pagination.previous': '&laquo; Previous',
@@ -205,11 +210,10 @@ export default function (Alpine, defaults = {}) {
             'of': 'of',
             'results': 'results',
         },
-        views: views,
         ...defaults,
     });
 
-    const render = (value) => defaults.views.templates[value.template ?? defaults.views._default].replace(
+    const render = (value) => defaults.views.templates[value.template ?? defaults.views._default].template.replace(
         '{expression}', `PaginationComponent(${JSON.stringify(value)})`,
     );
 
@@ -226,15 +230,8 @@ export default function (Alpine, defaults = {}) {
 
             return this;
         },
-        template(name, html) {
-            if (!html instanceof Function) {
-                defaults.views.templates[name] = html;
-
-                return this;
-            }
-
-            const { views } = html();
-            defaults.views.templates[name] = views.templates[views._default];
+        template(name, template) {
+            defaults.views.templates[name] = template();
 
             return this;
         },

@@ -97,8 +97,4 @@ const template = `
     </div>
 </nav>`;
 
-export function tailwind() {
-    const name = 'tailwind';
-
-    return { views: { _default: name, templates: { [name]: template } } };
-}
+export const tailwind = () => ({ template });

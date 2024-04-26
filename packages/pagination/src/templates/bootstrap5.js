@@ -90,8 +90,4 @@ const template = `
     </div>
 </nav>`;
 
-export function bootstrap5() {
-    const name = 'bootstrap5';
-
-    return { views: { _default: name, templates: { [name]: template } } };
-}
+export const bootstrap5 = () => ({ template });

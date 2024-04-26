@@ -6,6 +6,7 @@ describe('Alpine $modal', () => {
     const delay = (timeout) => {
         return new Promise((resolve) => setTimeout(resolve, timeout));
     };
+
     beforeAll(() => {
         plugin(Alpine);
         Alpine.start();
