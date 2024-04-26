@@ -48,7 +48,6 @@ describe('Alpine $modal', () => {
         async function shouldBe(title) {
             Alpine.$alert('hello world', { title });
             await Alpine.nextTick(async () => {
-                await delay(500);
                 const dialog = screen.queryByRole('dialog');
                 expect(dialog.querySelector('[x-html=title]').innerHTML).toEqual(title);
             });
@@ -60,14 +59,15 @@ describe('Alpine $modal', () => {
     it('show close button', async () => {
         Alpine.$modal.show({ showCloseButton: true });
         await Alpine.nextTick(async () => {
-            shouldBeDisplayed(document.querySelector('[x-show=showCloseButton]'));
+            const dialog = screen.queryByRole('dialog');
+            shouldBeDisplayed(dialog.querySelector('[x-show=showCloseButton]'));
         });
     });
 
     describe('$alert', () => {
         it('alert ok', async () => {
             const promise = Alpine.$alert('something went wrong');
-            await Alpine.nextTick(() => {
+            await Alpine.nextTick(async () => {
                 fireEvent.click(screen.queryByText('Ok'));
             });
 
@@ -104,12 +104,13 @@ describe('Alpine $modal', () => {
         it('prompt ok', async () => {
             const promise = Alpine.$prompt('are you sure?');
             await Alpine.nextTick(() => {
-                const input = document.querySelector('input');
+                const dialog = screen.queryByRole('dialog');
+                const input = dialog.querySelector('input');
                 input._x_model.set('foo');
                 fireEvent.click(screen.queryByText('Ok'));
             });
             await Alpine.nextTick(async () => {
-                await delay(300);
+                await delay(350);
                 expect(await promise).toEqual('foo');
             });
         });
@@ -117,13 +118,14 @@ describe('Alpine $modal', () => {
         it('prompt cancel', async () => {
             const promise = Alpine.$prompt('are you sure?');
             await Alpine.nextTick(() => {
-                const input = document.querySelector('input');
+                const dialog = screen.queryByRole('dialog');
+                const input = dialog.querySelector('input');
                 input._x_model.set('foo');
                 fireEvent.click(screen.queryByText('Cancel'));
             });
 
             await Alpine.nextTick(async () => {
-                await delay(300);
+                await delay(350);
                 expect(await promise).toBeFalsy();
             });
         });
@@ -131,7 +133,6 @@ describe('Alpine $modal', () => {
         it('prompt input invalid', async () => {
             const promise = Alpine.$prompt('are you sure?');
             await Alpine.nextTick(() => {
-                const input = document.querySelector('input');
                 fireEvent.click(screen.queryByText('Ok'));
             });
             await Alpine.nextTick(async () => {
