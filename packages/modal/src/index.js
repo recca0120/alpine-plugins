@@ -124,6 +124,10 @@ class Modal {
         });
     }
 
+    async hide(result = undefined) {
+        return this.close(result);
+    }
+
     async alert(message, options) {
         const { classes } = this.currentTheme;
 
