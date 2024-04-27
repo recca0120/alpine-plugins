@@ -2,6 +2,26 @@ export * from './themes/tailwind.js';
 export * from './themes/bootstrap5.js';
 import { tailwind } from './themes/tailwind.js';
 
+const data_get = (obj, key) => {
+    if (obj.hasOwnProperty(key)) {
+        return obj[key];
+    }
+
+    const segments = key.split('.');
+
+    let tmp = obj;
+    while (segments.length > 0) {
+        const segment = segments.shift();
+        if (!tmp[segment]) {
+            return key;
+        }
+
+        tmp = tmp[segment];
+    }
+
+    return tmp;
+};
+
 /**
  * Performs a deep merge of objects and returns new object. Does not modify
  * objects (immutable) and merges arrays via concatenation.
@@ -217,7 +237,13 @@ class Paginator {
     }
 
     __(key, parameters = {}) {
-        return Object.entries(parameters).reduce((text, [key, value]) => text.replace(`:${key}`, value), this.defaults.i18n[key]);
+        const i18n = this.defaults.i18n.en_US;
+
+        return Object
+            .entries(parameters)
+            .reduce((text, [key, value]) => {
+                return text.replace(`:${key}`, value);
+            }, data_get(i18n, key));
     }
 }
 
@@ -226,15 +252,17 @@ export default function (Alpine, defaults = {}) {
         theme: 'tailwind',
         themes: { tailwind: tailwind() },
         i18n: {
-            'Pagination Navigation': 'Pagination Navigation',
-            'pagination.previous': '&laquo; Previous',
-            'pagination.next': 'Next &raquo;',
-            'Go to page :page': 'Go to page :page',
-            'Showing': 'Showing',
-            'from': 'from',
-            'to': 'to',
-            'of': 'of',
-            'results': 'results',
+            en_US: {
+                'Pagination Navigation': 'Pagination Navigation',
+                'pagination.previous': '&laquo; Previous',
+                'pagination.next': 'Next &raquo;',
+                'Go to page :page': 'Go to page :page',
+                'Showing': 'Showing',
+                'from': 'from',
+                'to': 'to',
+                'of': 'of',
+                'results': 'results',
+            },
         },
     }, defaults));
 

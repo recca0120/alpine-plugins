@@ -1,6 +1,26 @@
 export { tailwind } from './themes/tailwind.js';
 import { tailwind } from './themes/tailwind.js';
 
+const data_get = (obj, key) => {
+    if (obj.hasOwnProperty(key)) {
+        return obj[key];
+    }
+
+    const segments = key.split('.');
+
+    let tmp = obj;
+    while (segments.length > 0) {
+        const segment = segments.shift();
+        if (!tmp[segment]) {
+            return key;
+        }
+
+        tmp = tmp[segment];
+    }
+
+    return tmp;
+};
+
 /**
  * Performs a deep merge of objects and returns new object. Does not modify
  * objects (immutable) and merges arrays via concatenation.
@@ -201,7 +221,13 @@ class Modal {
     };
 
     __(key, parameters = {}) {
-        return Object.entries(parameters).reduce((text, [key, value]) => text.replace(`:${key}`, value), this.defaults.i18n[key]);
+        const i18n = this.defaults.i18n.en_US;
+
+        return Object
+            .entries(parameters)
+            .reduce((text, [key, value]) => {
+                return text.replace(`:${key}`, value);
+            }, data_get(i18n, key));
     }
 }
 
@@ -213,11 +239,11 @@ export default function (Alpine, defaults = {}) {
         confirm: { backdrop: false, keyboard: false, showCloseButton: false },
         prompt: { backdrop: false, keyboard: false, showCloseButton: false },
         i18n: {
-            'alert.ok': 'Ok',
-            'confirm.ok': 'Ok',
-            'confirm.cancel': 'Cancel',
-            'prompt.ok': 'Ok',
-            'prompt.cancel': 'Cancel',
+            en_US: {
+                alert: { ok: 'Ok' },
+                confirm: { ok: 'Ok', cancel: 'Cancel' },
+                prompt: { ok: 'Ok', cancel: 'Cancel' },
+            },
         },
     }, defaults));
 
