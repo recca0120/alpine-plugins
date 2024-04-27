@@ -6,7 +6,7 @@
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Demo</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script src="./js/tailwindcss.js"></script>
 </head>
 <body>
 <div class="container mx-auto p-5">
@@ -90,8 +90,8 @@
         <div x-pagination="pagination"></div>
     </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/axios@1.6.8/dist/axios.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/axios-mock-adapter@1.22.0/dist/axios-mock-adapter.min.js"></script>
+<script src="js/axios.min.js"></script>
+<script src="js/axios-mock-adapter.min.js"></script>
 <script type="module">
     import Alpine from './node_modules/alpinejs/dist/module.esm.js';
     import errors from './packages/errors/src/index.js';
@@ -114,6 +114,7 @@
     });
 
     Alpine.start();
+
     window.Alpine = Alpine;
 </script>
 </body>

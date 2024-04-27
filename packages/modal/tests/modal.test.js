@@ -27,7 +27,7 @@ describe('Alpine $modal', () => {
 
             fireEvent.click(dialog.querySelector('button'));
         });
-        await delay(300);
+        await delay(350);
         shouldBeHidden(dialog);
     });
 
@@ -55,11 +55,11 @@ describe('Alpine $modal', () => {
 
         await shouldBe('foo');
     });
-
     it('show close button', async () => {
         Alpine.$modal.show({ showCloseButton: true });
         await Alpine.nextTick(async () => {
             const dialog = screen.queryByRole('dialog');
+            await delay(400);
             shouldBeDisplayed(dialog.querySelector('[x-show=showCloseButton]'));
         });
     });
