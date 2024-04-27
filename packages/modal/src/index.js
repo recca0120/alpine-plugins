@@ -237,13 +237,19 @@ class Modal {
 export default function (Alpine, defaults = {}) {
     defaults = Alpine.reactive(mergeDeep({
         theme: 'tailwind',
-        themes: { tailwind: tailwind() },
+        themes: { tailwind },
         alert: { backdrop: false, keyboard: false, showCloseButton: false },
         confirm: { backdrop: false, keyboard: false, showCloseButton: false },
         prompt: { backdrop: false, keyboard: false, showCloseButton: false },
         lang: 'en_US',
         i18n: { en_US },
     }, defaults));
+
+    for (let x in defaults.themes) {
+        if (defaults.themes[x] instanceof Function) {
+            defaults.themes[x] = defaults.themes[x]();
+        }
+    }
 
     const instance = (name = '') => {
         const id = ['ModalComponent', name].filter(v => !!v).join('_');

@@ -102,7 +102,7 @@
     const MockAdapter = window.AxiosMockAdapter;
 
     errors(Alpine);
-    pagination(Alpine).setTheme('bootstrap5', bootstrap5);
+    pagination(Alpine, { themes: { bootstrap5 } });
     modal(Alpine);
 
     Alpine.$errors.registerAxiosInterceptor(axios);

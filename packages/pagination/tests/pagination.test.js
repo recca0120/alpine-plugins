@@ -38,7 +38,7 @@ describe('Alpine pagination directive', () => {
     };
 
     beforeAll(() => {
-        plugin(Alpine).setTheme('bootstrap5', bootstrap5);
+        plugin(Alpine, { themes: { bootstrap5 } });
         Alpine.start();
     });
 

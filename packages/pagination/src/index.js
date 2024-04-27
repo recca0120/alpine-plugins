@@ -254,10 +254,16 @@ class Paginator {
 export default function (Alpine, defaults = {}) {
     defaults = Alpine.reactive(mergeDeep({
         theme: 'tailwind',
-        themes: { tailwind: tailwind() },
+        themes: { tailwind: tailwind },
         lang: 'en_US',
         i18n: { en_US },
     }, defaults));
+
+    for (let x in defaults.themes) {
+        if (defaults.themes[x] instanceof Function) {
+            defaults.themes[x] = defaults.themes[x]();
+        }
+    }
 
     Alpine.data('PaginationComponent', (options) => new Paginator(options, defaults));
 
@@ -269,28 +275,4 @@ export default function (Alpine, defaults = {}) {
         const evaluator = evaluateLater(expression);
         effect(() => evaluator(value => el.innerHTML = render(value)));
     });
-
-    return {
-        theme(name) {
-            defaults.theme = name;
-
-            return this;
-        },
-        setTheme(name, theme) {
-            if (theme instanceof Function) {
-                defaults.themes[name] = theme();
-            } else {
-                defaults.themes[name].template = theme;
-            }
-
-            return this;
-        },
-        i18n(key, value) {
-            if (typeof key === 'object') {
-                defaults.i18n = { ...defaults.i18n, ...key };
-            } else {
-                defaults.i18n[key] = value;
-            }
-        },
-    };
 }
