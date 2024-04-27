@@ -1,5 +1,8 @@
-export { tailwind } from './themes/tailwind.js';
 import { tailwind } from './themes/tailwind.js';
+import { en_US } from './i18n/en_US.js';
+
+export * from './i18n/zh_TW.js';
+export * from './themes/tailwind.js';
 
 const data_get = (obj, key) => {
     if (obj.hasOwnProperty(key)) {
@@ -221,7 +224,7 @@ class Modal {
     };
 
     __(key, parameters = {}) {
-        const i18n = this.defaults.i18n.en_US;
+        const i18n = this.defaults.i18n[this.defaults.lang];
 
         return Object
             .entries(parameters)
@@ -238,13 +241,8 @@ export default function (Alpine, defaults = {}) {
         alert: { backdrop: false, keyboard: false, showCloseButton: false },
         confirm: { backdrop: false, keyboard: false, showCloseButton: false },
         prompt: { backdrop: false, keyboard: false, showCloseButton: false },
-        i18n: {
-            en_US: {
-                alert: { ok: 'Ok' },
-                confirm: { ok: 'Ok', cancel: 'Cancel' },
-                prompt: { ok: 'Ok', cancel: 'Cancel' },
-            },
-        },
+        lang: 'en_US',
+        i18n: { en_US },
     }, defaults));
 
     const instance = (name = '') => {

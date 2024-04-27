@@ -1,6 +1,10 @@
+import { tailwind } from './themes/tailwind.js';
+import { en_US } from './i18n/en_US.js';
+
 export * from './themes/tailwind.js';
 export * from './themes/bootstrap5.js';
-import { tailwind } from './themes/tailwind.js';
+export * from './i18n/en_US.js';
+export * from './i18n/zh_TW.js';
 
 const data_get = (obj, key) => {
     if (obj.hasOwnProperty(key)) {
@@ -237,7 +241,7 @@ class Paginator {
     }
 
     __(key, parameters = {}) {
-        const i18n = this.defaults.i18n.en_US;
+        const i18n = this.defaults.i18n[this.defaults.lang];
 
         return Object
             .entries(parameters)
@@ -251,19 +255,8 @@ export default function (Alpine, defaults = {}) {
     defaults = Alpine.reactive(mergeDeep({
         theme: 'tailwind',
         themes: { tailwind: tailwind() },
-        i18n: {
-            en_US: {
-                'Pagination Navigation': 'Pagination Navigation',
-                'pagination.previous': '&laquo; Previous',
-                'pagination.next': 'Next &raquo;',
-                'Go to page :page': 'Go to page :page',
-                'Showing': 'Showing',
-                'from': 'from',
-                'to': 'to',
-                'of': 'of',
-                'results': 'results',
-            },
-        },
+        lang: 'en_US',
+        i18n: { en_US },
     }, defaults));
 
     Alpine.data('PaginationComponent', (options) => new Paginator(options, defaults));
