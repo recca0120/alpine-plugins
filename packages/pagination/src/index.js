@@ -256,7 +256,11 @@ export default function (Alpine, defaults = {}) {
             return this;
         },
         setTheme(name, theme) {
-            defaults.themes[name] = theme();
+            if (theme instanceof Function) {
+                defaults.themes[name] = theme();
+            } else {
+                defaults.themes[name].template = theme;
+            }
 
             return this;
         },
