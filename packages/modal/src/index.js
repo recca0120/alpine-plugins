@@ -187,7 +187,7 @@ class Modal {
             }, {
                 text: this.__('confirm.cancel'),
                 handle(_event, instance) {
-                    instance.close(true);
+                    instance.close(false);
                 },
             }],
             ...options,

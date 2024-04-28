@@ -16,11 +16,11 @@ describe('Alpine $errors', () => {
                                class="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                :class="{'text-red-900 ring-red-300 placeholder:text-red-300 focus:ring-red-500': $errors.has('${name}')}"
                                @keyup="$errors.remove('${name}')"
-                               role="input">
+                               data-testId="input">
                     </div>
 
                     <template x-if="$errors.has('${name}')">
-                        <p x-text="$errors.first('${name}')" class="mt-2 text-sm text-red-600" id="${name}-error" role="error-message"></p>
+                        <p x-text="$errors.first('${name}')" class="mt-2 text-sm text-red-600" id="${name}-error" data-testId="error-message"></p>
                     </template>
                 </div>
             </div>
@@ -53,12 +53,10 @@ describe('Alpine $errors', () => {
 
     afterEach(() => document.body.innerHTML = '');
 
-    const getInvalidInputs = () => screen.queryAllByRole('input').filter(el => el.classList.contains('text-red-900'));
-    const getErrorMessages = () => screen.queryAllByRole('error-message');
+    const getInvalidInputs = () => screen.queryAllByTestId('input', {}).filter(el => el.classList.contains('text-red-900'));
+    const getErrorMessages = () => screen.queryAllByTestId('error-message', {});
 
     async function expectShowError() {
-
-
         try {
             await axios.post('/users');
         } catch (e) {

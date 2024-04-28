@@ -1,6 +1,7 @@
 import Alpine from 'alpinejs';
 import plugin from '../src/index.js';
-import { fireEvent, screen } from '@testing-library/dom';
+import '@testing-library/jest-dom';
+import { fireEvent, screen, waitFor, waitForElementToBeRemoved } from '@testing-library/dom';
 
 describe('Alpine $modal', () => {
     beforeAll(() => {
@@ -12,30 +13,21 @@ describe('Alpine $modal', () => {
 
     it('show', async () => {
         Alpine.$alert('');
-        await Alpine.nextTick(() => {
-            const dialog = screen.queryByRole('dialog');
-            shouldBeDisplayed(dialog);
-        });
+        const dialog = await screen.findByRole('dialog', {});
+        expect(dialog).toBeInTheDocument();
     });
 
     it('close', async () => {
         Alpine.$alert('');
-        let dialog;
-        await Alpine.nextTick(async () => {
-            dialog = screen.queryByRole('dialog');
-            shouldBeDisplayed(dialog);
-
-            fireEvent.click(dialog.querySelector('button'));
-        });
-        await delay(350);
-        shouldBeHidden(dialog);
+        fireEvent.click(await screen.findByRole('button', { name: /ok/i }));
+        await waitForElementToBeRemoved(() => screen.queryByRole('dialog', {}));
     });
 
     it('set message', async () => {
         async function shouldBe(message) {
             Alpine.$alert(message);
             await Alpine.nextTick(async () => {
-                const dialog = screen.queryByRole('dialog');
+                const dialog = await screen.findByRole('dialog', {});
                 expect(dialog.querySelector('[x-html=message]').innerHTML).toEqual(message);
             });
         }
@@ -48,109 +40,93 @@ describe('Alpine $modal', () => {
         async function shouldBe(title) {
             Alpine.$alert('hello world', { title });
             await Alpine.nextTick(async () => {
-                const dialog = screen.queryByRole('dialog');
+                const dialog = await screen.findByRole('dialog', {});
                 expect(dialog.querySelector('[x-html=title]').innerHTML).toEqual(title);
             });
         }
 
         await shouldBe('foo');
+        await shouldBe('bar');
     });
+
+    it('hide close button', async () => {
+        Alpine.$modal.show({ showCloseButton: false });
+        await Alpine.nextTick(async () => {
+            const dialog = await screen.findByRole('dialog', {});
+            await waitFor(() => expect(dialog.querySelector('[x-show=showCloseButton]')).not.toBeVisible());
+        });
+    });
+
     it('show close button', async () => {
         Alpine.$modal.show({ showCloseButton: true });
         await Alpine.nextTick(async () => {
-            const dialog = screen.queryByRole('dialog');
-            await delay(400);
-            shouldBeDisplayed(dialog.querySelector('[x-show=showCloseButton]'));
+            const dialog = await screen.findByRole('dialog', {});
+            await waitFor(() => expect(dialog.querySelector('[x-show=showCloseButton]')).toBeVisible());
         });
     });
 
     describe('$alert', () => {
         it('alert ok', async () => {
-            const promise = Alpine.$alert('something went wrong');
+            const result = Alpine.$alert('something went wrong');
             await Alpine.nextTick(async () => {
-                fireEvent.click(screen.queryByText('Ok'));
+                fireEvent.click(await screen.findByRole('button', { name: /ok/i }));
+                await waitFor(async () => expect(await result).toBeFalsy());
             });
-
-            await Alpine.nextTick(async () => {
-                expect(await promise).toBeFalsy();
-            });
+            await waitForElementToBeRemoved(() => screen.queryByRole('dialog', {}));
         });
     });
 
     describe('$confirm', () => {
         it('confirm ok', async () => {
-            const promise = Alpine.$confirm('are you sure?');
-            await Alpine.nextTick(() => {
-                fireEvent.click(screen.queryByText('Ok'));
-            });
-
+            const result = Alpine.$confirm('are you sure?');
             await Alpine.nextTick(async () => {
-                expect(await promise).toBeTruthy();
+                fireEvent.click(await screen.findByRole('button', { name: /ok/i }));
+                await waitFor(async () => expect(await result).toBeTruthy());
             });
+            await waitForElementToBeRemoved(() => screen.queryByRole('dialog', {}));
         });
 
         it('confirm cancel', async () => {
-            const promise = Alpine.$confirm('are you sure?');
-            await Alpine.nextTick(() => {
-                fireEvent.click(screen.queryByText('Cancel'));
-            });
+            const result = Alpine.$confirm('are you sure?');
             await Alpine.nextTick(async () => {
-                expect(await promise).toBeFalsy();
+                fireEvent.click(await screen.findByRole('button', { name: /cancel/i }));
+                await waitFor(async () => expect(await result).toBeFalsy());
             });
+            await waitForElementToBeRemoved(() => screen.queryByRole('dialog', {}));
         });
     });
 
     describe('$prompt', () => {
         it('prompt ok', async () => {
-            const promise = Alpine.$prompt('are you sure?');
-            await Alpine.nextTick(() => {
-                const dialog = screen.queryByRole('dialog');
+            const result = Alpine.$prompt('are you sure?');
+            await Alpine.nextTick(async () => {
+                const dialog = await screen.findByRole('dialog', {});
                 const input = dialog.querySelector('input');
                 input._x_model.set('foo');
-                fireEvent.click(screen.queryByText('Ok'));
+                fireEvent.click(await screen.findByRole('button', { name: /ok/i }));
+                await waitFor(async () => expect(await result).toEqual('foo'));
             });
-            await Alpine.nextTick(async () => {
-                await delay(350);
-                expect(await promise).toEqual('foo');
-            });
+            await waitForElementToBeRemoved(() => screen.queryByRole('dialog', {}));
         });
 
         it('prompt cancel', async () => {
-            const promise = Alpine.$prompt('are you sure?');
-            await Alpine.nextTick(() => {
-                const dialog = screen.queryByRole('dialog');
+            const result = Alpine.$prompt('are you sure?');
+            await Alpine.nextTick(async () => {
+                const dialog = await screen.findByRole('dialog', {});
                 const input = dialog.querySelector('input');
                 input._x_model.set('foo');
-                fireEvent.click(screen.queryByText('Cancel'));
+                fireEvent.click(await screen.findByRole('button', { name: /cancel/i }));
+                await waitFor(async () => expect(await result).toBeFalsy);
             });
-
-            await Alpine.nextTick(async () => {
-                await delay(350);
-                expect(await promise).toBeFalsy();
-            });
+            await waitForElementToBeRemoved(() => screen.queryByRole('dialog', {}));
         });
 
         it('prompt input invalid', async () => {
-            const promise = Alpine.$prompt('are you sure?');
-            await Alpine.nextTick(() => {
-                fireEvent.click(screen.queryByText('Ok'));
-            });
-            await Alpine.nextTick(async () => {
-                const input = document.querySelector('input');
-                expect(input.className).toContain('text-red-900');
-            });
+            Alpine.$prompt('are you sure?');
+            const dialog = await screen.findByRole('dialog', {});
+            const input = dialog.querySelector('input');
+            fireEvent.click(await screen.findByRole('button', { name: /ok/i }));
+            await waitFor(() => expect(input.className).toContain('text-red-900'));
         });
     });
-
-    const delay = (timeout) => {
-        return new Promise((resolve) => setTimeout(resolve, timeout));
-    };
-
-    const shouldBeDisplayed = element => {
-        expect(element.style.display).toEqual('');
-    };
-
-    const shouldBeHidden = element => {
-        expect(element.style.display).toEqual('none');
-    };
 });

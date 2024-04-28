@@ -1,12 +1,10 @@
-import { fireEvent, screen } from '@testing-library/dom';
+import '@testing-library/jest-dom';
+import { fireEvent, screen, waitFor } from '@testing-library/dom';
 import he from 'he';
 import Alpine from 'alpinejs';
 import plugin, { bootstrap5 } from '../src';
 
 describe('Alpine pagination directive', () => {
-    const emptyFn = () => {
-    };
-
     const encode = (text) => {
         return he.encode(text, { 'useNamedReferences': true, 'decimal': true });
     };
@@ -16,6 +14,7 @@ describe('Alpine pagination directive', () => {
         .map((text) => parseInt(text, 10))
         .filter((num) => num);
 
+    /** @return HTMLElement */
     const getPrevOrNext = (pagination, filters) => {
         return Array.from(pagination.querySelectorAll('nav *'))
             .filter((el) => filters.some((f) => RegExp(f, 'i').test(encode(el.textContent.trim()))))
@@ -26,15 +25,17 @@ describe('Alpine pagination directive', () => {
     const getPrev = (pagination) => getPrevOrNext(pagination, ['&laquo;', 'Previous']);
     const getNext = (pagination) => getPrevOrNext(pagination, ['Next', '&raquo;']);
 
-    const givenComponent = (options, callback = emptyFn) => {
+    /** @return HTMLElement */
+    const givenComponent = (options) => {
         const component = document.createElement('div');
         component.innerHTML = `
             <div x-data='{ pagination: ${JSON.stringify(options)} }'>
-                <div x-pagination='pagination' role="pagination"/>
+                <div x-pagination='pagination' data-testId="pagination"/>
             </div>
         `;
-        component.addEventListener('change', callback);
         document.body.append(component);
+
+        return component;
     };
 
     beforeAll(() => {
@@ -50,9 +51,9 @@ describe('Alpine pagination directive', () => {
         givenComponent({});
 
         await Alpine.nextTick(() => {
-            const pagination = screen.getByRole('pagination');
+            const pagination = screen.getByTestId('pagination', {});
 
-            expect(document.querySelector('nav').style.display).toEqual('none');
+            expect(document.querySelector('nav')).not.toBeVisible();
             expect(getPrev(pagination).tagName).toEqual('SPAN');
             expect(getNext(pagination).tagName).toEqual('SPAN');
             expect(getPages(pagination)).toEqual([]);
@@ -63,7 +64,7 @@ describe('Alpine pagination directive', () => {
         givenComponent({ current_page: 1, per_page: 10, total: 5 });
 
         await Alpine.nextTick(() => {
-            const pagination = screen.getByRole('pagination');
+            const pagination = screen.getByTestId('pagination', {});
 
             expect((document.querySelector('nav').classList.contains('flex'))).toBeTruthy();
             expect(getPrev(pagination).tagName).toEqual('SPAN');
@@ -76,7 +77,7 @@ describe('Alpine pagination directive', () => {
         givenComponent({ current_page: 500, per_page: 10, total: 10000 });
 
         await Alpine.nextTick(() => {
-            const pagination = screen.getByRole('pagination');
+            const pagination = screen.getByTestId('pagination', {});
 
             expect(getPrev(pagination).tagName).toEqual('A');
             expect(getNext(pagination).tagName).toEqual('A');
@@ -88,7 +89,7 @@ describe('Alpine pagination directive', () => {
         givenComponent({ current_page: 1, per_page: 10, total: 100 });
 
         await Alpine.nextTick(() => {
-            const pagination = screen.getByRole('pagination');
+            const pagination = screen.getByTestId('pagination', {});
 
             expect(getPrev(pagination).tagName).toEqual('SPAN');
             expect(getNext(pagination).tagName).toEqual('A');
@@ -100,7 +101,7 @@ describe('Alpine pagination directive', () => {
         givenComponent({ current_page: 10, per_page: 10, total: 100 });
 
         await Alpine.nextTick(() => {
-            const pagination = screen.getByRole('pagination');
+            const pagination = screen.getByTestId('pagination', {});
 
             expect(getPrev(pagination).tagName).toEqual('A');
             expect(getNext(pagination).tagName).toEqual('SPAN');
@@ -112,7 +113,7 @@ describe('Alpine pagination directive', () => {
         givenComponent({ current_page: 5, per_page: 10, total: 100 });
 
         await Alpine.nextTick(() => {
-            const pagination = screen.getByRole('pagination');
+            const pagination = screen.getByTestId('pagination', {});
 
             expect(getPrev(pagination).tagName).toEqual('A');
             expect(getNext(pagination).tagName).toEqual('A');
@@ -120,16 +121,16 @@ describe('Alpine pagination directive', () => {
         });
     });
 
-    it('fire page change', (done) => {
-        givenComponent({ current_page: 500, per_page: 10, total: 10000 }, (e) => {
-            expect(e.detail).toEqual(499);
-            done();
-        });
+    it('fire page change', async () => {
+        const component = givenComponent({ current_page: 500, per_page: 10, total: 10000 });
 
-        Alpine.nextTick(() => {
-            const pagination = screen.getByRole('pagination');
+        let detail;
+        component.addEventListener('change', (e) => (detail = e.detail));
 
+        await Alpine.nextTick(async () => {
+            const pagination = screen.getByTestId('pagination', {});
             fireEvent.click(getPrev(pagination));
+            await waitFor(() => expect(detail).toEqual(499));
         });
     });
 
@@ -137,7 +138,7 @@ describe('Alpine pagination directive', () => {
         givenComponent({ current_page: 1, per_page: 10, total: 5, theme: 'bootstrap5' });
 
         await Alpine.nextTick(() => {
-            const pagination = screen.getByRole('pagination');
+            const pagination = screen.getByTestId('pagination', {});
 
             expect((document.querySelector('nav').classList.contains('d-flex'))).toBeTruthy();
             expect(getPrev(pagination).tagName).toEqual('SPAN');
