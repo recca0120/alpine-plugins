@@ -1,5 +1,5 @@
 import Alpine from 'alpinejs';
-import plugin from '../src/index.js';
+import plugin from '../src';
 import '@testing-library/jest-dom';
 import { fireEvent, screen, waitFor, waitForElementToBeRemoved } from '@testing-library/dom';
 

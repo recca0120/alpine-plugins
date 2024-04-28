@@ -92,11 +92,18 @@
 </div>
 <script src="./node_modules/axios/dist/axios.min.js"></script>
 <script src="./node_modules/axios-mock-adapter/dist/axios-mock-adapter.min.js"></script>
+<script type="importmap">
+    {
+        "imports": {
+            "alpinejs": "./node_modules/alpinejs/dist/module.esm.js"
+        }
+    }
+</script>
 <script type="module">
-    import Alpine from './node_modules/alpinejs/dist/module.esm.js';
-    import errors from './packages/errors/src/index.js';
-    import pagination, { bootstrap5 } from './packages/pagination/src/index.js';
-    import modal from './packages/modal/src/index.js';
+    import Alpine from 'alpinejs';
+    import errors from './packages/errors/dist/module.esm.js';
+    import pagination, { bootstrap5 } from './packages/pagination/dist/module.esm.js';
+    import modal from './packages/modal/dist/module.esm.js';
 
     const axios = window.axios;
     const MockAdapter = window.AxiosMockAdapter;

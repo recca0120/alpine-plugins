@@ -1,0 +1,18 @@
+{
+  "version": "1.0.0",
+  "main": "dist/module.cjs.js",
+  "module": "dist/module.esm.js",
+  "unpkg": "dist/cdn.min.js",
+  "type": "module",
+  "scripts": {
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.24.4",
+    "@testing-library/dom": "^10.0.0",
+    "@testing-library/jest-dom": "^6.4.2",
+    "alpinejs": "^3.13.9",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0"
+  }
+}

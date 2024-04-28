@@ -1,70 +1,9 @@
-import { tailwind } from './themes/tailwind.js';
-import { en_US } from './i18n/en_US.js';
+import { en_US } from './i18n';
+import { tailwind } from './themes';
+import { data_get, deferred, emptyFn, mergeDeep } from './utils.js';
 
-export * from './i18n/zh_TW.js';
-export * from './themes/tailwind.js';
-
-const data_get = (obj, key) => {
-    if (obj.hasOwnProperty(key)) {
-        return obj[key];
-    }
-
-    const segments = key.split('.');
-
-    let tmp = obj;
-    while (segments.length > 0) {
-        const segment = segments.shift();
-        if (!tmp[segment]) {
-            return key;
-        }
-
-        tmp = tmp[segment];
-    }
-
-    return tmp;
-};
-
-/**
- * Performs a deep merge of objects and returns new object. Does not modify
- * objects (immutable) and merges arrays via concatenation.
- *
- * @param {...object} objects - Objects to merge
- * @returns {object} New object with merged key/values
- */
-function mergeDeep(...objects) {
-    const isObject = obj => obj && typeof obj === 'object';
-
-    return objects.reduce((prev, obj) => {
-        Object.keys(obj).forEach(key => {
-            const pVal = prev[key];
-            const oVal = obj[key];
-
-            if (Array.isArray(pVal) && Array.isArray(oVal)) {
-                prev[key] = pVal.concat(...oVal);
-            } else if (isObject(pVal) && isObject(oVal)) {
-                prev[key] = mergeDeep(pVal, oVal);
-            } else {
-                prev[key] = oVal;
-            }
-        });
-
-        return prev;
-    }, {});
-}
-
-const emptyFn = () => {
-};
-
-const deferred = () => {
-    let resolve;
-    let reject;
-    const promise = new Promise((_resolve, _reject) => {
-        resolve = _resolve;
-        reject = _reject;
-    });
-
-    return { promise, reject, resolve };
-};
+export * from './i18n';
+export * from './themes';
 
 class Modal {
     deferred = null;
