@@ -81,5 +81,5 @@ class MessageBag {
 export default function (Alpine) {
     const errors = Alpine.reactive(new MessageBag());
     Alpine.magic('errors', () => errors);
-    Object.defineProperty(Alpine, '$errors', { get: () => errors });
+    Object.defineProperty(Alpine, 'errors', { get: () => errors });
 }

@@ -1,6 +1,6 @@
 import { en_US } from './i18n';
 import { tailwind } from './themes';
-import { data_get, mergeDeep } from './utils.js';
+import { data_get, deepMerge } from './utils.js';
 
 export * from './i18n';
 export * from './themes';
@@ -111,12 +111,12 @@ class Paginator {
     current_page = 1;
     on_each_side = 3;
 
-    constructor(options = {}, defaults = {}) {
+    constructor(options = {}, config = {}) {
         this.total = options.total ?? 0;
         this.per_page = options.per_page ?? 10;
         this.current_page = Math.max(options.current_page ?? 1, 1);
         this.on_each_side = options.on_each_side ?? 3;
-        this.defaults = defaults;
+        this.config = config;
     }
 
     get onEachSide() {
@@ -192,7 +192,7 @@ class Paginator {
     }
 
     __(key, parameters = {}) {
-        const i18n = this.defaults.i18n[this.defaults.lang];
+        const i18n = this.config.i18n[this.config.lang];
 
         return Object
             .entries(parameters)
@@ -202,28 +202,59 @@ class Paginator {
     }
 }
 
-export default function (Alpine, defaults = {}) {
-    defaults = Alpine.reactive(mergeDeep({
+export default function (Alpine) {
+    const config = {
         theme: 'tailwind',
-        themes: { tailwind: tailwind },
+        themes: { tailwind: tailwind() },
         lang: 'en_US',
         i18n: { en_US },
-    }, defaults));
+    };
 
-    for (let x in defaults.themes) {
-        if (defaults.themes[x] instanceof Function) {
-            defaults.themes[x] = defaults.themes[x]();
-        }
-    }
+    Alpine.data('PaginationComponent', (options) => new Paginator(options, config));
 
-    Alpine.data('PaginationComponent', (options) => new Paginator(options, defaults));
-
-    const render = (value) => defaults.themes[value.theme ?? defaults.theme].template.replace(
+    const render = (value) => config.themes[value.theme ?? config.theme].template.replace(
         '{expression}', `PaginationComponent(${JSON.stringify(value)})`,
     );
 
     Alpine.directive('pagination', (el, { expression }, { evaluateLater, effect }) => {
         const evaluator = evaluateLater(expression);
         effect(() => evaluator(value => el.innerHTML = render(value)));
+    });
+
+    Object.defineProperty(Alpine, 'pagination', {
+        get: () => ({
+            config(key, value) {
+                if (key instanceof Object) {
+                    Object.entries(key).forEach(([k, v]) => this.config(k, v));
+
+                    return this;
+                }
+
+                if (key === 'themes') {
+                    Object.entries(value).forEach(([name, theme]) => this.addTheme(name, theme));
+
+                    return this;
+                }
+
+                deepMerge(config, { [key]: value });
+
+                return this;
+            },
+            theme(name) {
+                config.theme = name;
+
+                return this;
+            },
+            addTheme(name, theme) {
+                deepMerge(config, { themes: { [name]: theme instanceof Function ? theme() : theme } });
+
+                return this;
+            },
+            i18n(name, lang) {
+                deepMerge(config, { i18n: { [name]: lang } });
+
+                return this;
+            },
+        }),
     });
 }

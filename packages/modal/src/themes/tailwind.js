@@ -1,7 +1,5 @@
 export const template = `
-<div x-cloak
-     x-show="open"
-     x-id="['modal-title']"
+<div x-id="['modal-title']"
      @keydown.window.escape.prevent.stop="keyboard ? close() : ''"
      @click="backdrop ? close() : ''"
      :aria-labelledby="$id('modal-title')"

@@ -2,9 +2,9 @@ import { fireEvent, screen } from '@testing-library/dom';
 import axios from 'axios';
 import MockAdapter from 'axios-mock-adapter';
 import Alpine from 'alpinejs';
-import plugin from '../src';
+import errors from '../src';
 
-describe('Alpine $errors', () => {
+describe('Alpine errors', () => {
     const givenComponent = (name) => {
         const component = document.createElement('div');
         component.innerHTML = `
@@ -31,14 +31,14 @@ describe('Alpine $errors', () => {
     };
 
     beforeAll(() => {
-        plugin(Alpine);
+        errors(Alpine);
 
         const mock = new MockAdapter(axios);
         mock.onPost('/users').reply(422, {
             'message': 'The email field must be a valid email address.',
             'errors': { 'email': ['The email field must be a valid email address.'] },
         });
-        Alpine.$errors.registerAxiosInterceptor(axios);
+        Alpine.errors.registerAxiosInterceptor(axios);
 
         Alpine.start();
     });
@@ -74,7 +74,7 @@ describe('Alpine $errors', () => {
     it('clear errors', async () => {
         await expectShowError();
 
-        await Alpine.nextTick(() => Alpine.$errors.clear());
+        await Alpine.nextTick(() => Alpine.errors.clear());
 
         expect(getInvalidInputs()).toHaveLength(0);
         expect(getErrorMessages()).toHaveLength(0);

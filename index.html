@@ -108,11 +108,13 @@
     const axios = window.axios;
     const MockAdapter = window.AxiosMockAdapter;
 
-    errors(Alpine);
-    pagination(Alpine, { themes: { bootstrap5 } });
-    modal(Alpine);
+    Alpine.plugin(errors);
+    Alpine.plugin(modal);
+    Alpine.plugin(pagination);
 
-    Alpine.$errors.registerAxiosInterceptor(axios);
+    Alpine.errors.registerAxiosInterceptor(axios);
+    Alpine.modal.config({ i18n: { en_US: { alert: { ok: 'Close' } } } });
+    Alpine.pagination.config({ themes: { bootstrap5 } });
 
     const mock = new MockAdapter(window.axios);
     mock.onPost('/users').reply(422, {

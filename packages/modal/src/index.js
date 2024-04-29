@@ -1,6 +1,6 @@
 import { en_US } from './i18n';
 import { tailwind } from './themes';
-import { data_get, deferred, emptyFn, mergeDeep } from './utils.js';
+import { data_get, deepMerge, deferred, emptyFn } from './utils.js';
 
 export * from './i18n';
 export * from './themes';
@@ -18,12 +18,12 @@ class Modal {
     keyboard = true;
     _buttons = [{}];
 
-    constructor(defaults = {}) {
-        this.defaults = defaults;
+    constructor(config = {}) {
+        this.config = config;
     }
 
     get buttons() {
-        const { classes } = this.defaults.themes[this.defaults.theme];
+        const { classes } = this.config.themes[this.config.theme];
         const self = this;
 
         return this._buttons.map((button) => {
@@ -38,7 +38,7 @@ class Modal {
     }
 
     get currentTheme() {
-        return this.defaults.themes[this.defaults.theme];
+        return this.config.themes[this.config.theme];
     }
 
     get duration() {
@@ -95,9 +95,9 @@ class Modal {
 
         return this.show({
             message,
-            backdrop: this.defaults.alert.backdrop,
-            keyboard: this.defaults.alert.keyboard,
-            showCloseButton: this.defaults.alert.showCloseButton,
+            backdrop: this.config.alert.backdrop,
+            keyboard: this.config.alert.keyboard,
+            showCloseButton: this.config.alert.showCloseButton,
             buttons: [{
                 className: classes.primary,
                 text: this.__('alert.ok'),
@@ -114,9 +114,9 @@ class Modal {
 
         return this.show({
             message,
-            backdrop: this.defaults.confirm.backdrop,
-            keyboard: this.defaults.confirm.keyboard,
-            showCloseButton: this.defaults.confirm.showCloseButton,
+            backdrop: this.config.confirm.backdrop,
+            keyboard: this.config.confirm.keyboard,
+            showCloseButton: this.config.confirm.showCloseButton,
             buttons: [{
                 className: classes.primary,
                 text: this.__('confirm.ok'),
@@ -139,9 +139,9 @@ class Modal {
         return this.show({
             message,
             isPrompt: true,
-            backdrop: this.defaults.prompt.backdrop,
-            keyboard: this.defaults.prompt.keyboard,
-            showCloseButton: this.defaults.prompt.showCloseButton,
+            backdrop: this.config.prompt.backdrop,
+            keyboard: this.config.prompt.keyboard,
+            showCloseButton: this.config.prompt.showCloseButton,
             buttons: [{
                 className: classes.primary,
                 text: this.__('prompt.ok'),
@@ -163,7 +163,7 @@ class Modal {
     };
 
     __(key, parameters = {}) {
-        const i18n = this.defaults.i18n[this.defaults.lang];
+        const i18n = this.config.i18n[this.config.lang];
 
         return Object
             .entries(parameters)
@@ -173,22 +173,16 @@ class Modal {
     }
 }
 
-export default function (Alpine, defaults = {}) {
-    defaults = Alpine.reactive(mergeDeep({
+export default function (Alpine) {
+    const config = {
         theme: 'tailwind',
-        themes: { tailwind },
+        themes: { tailwind: tailwind() },
         alert: { backdrop: false, keyboard: false, showCloseButton: false },
         confirm: { backdrop: false, keyboard: false, showCloseButton: false },
         prompt: { backdrop: false, keyboard: false, showCloseButton: false },
         lang: 'en_US',
         i18n: { en_US },
-    }, defaults));
-
-    for (let x in defaults.themes) {
-        if (defaults.themes[x] instanceof Function) {
-            defaults.themes[x] = defaults.themes[x]();
-        }
-    }
+    };
 
     const instance = (name = '') => {
         const id = ['ModalComponent', name].filter(v => !!v).join('_');
@@ -201,7 +195,8 @@ export default function (Alpine, defaults = {}) {
         component = document.createElement('div');
         component.setAttribute('x-data', id);
         component.setAttribute('x-modal', '');
-        component.x_modal = Alpine.reactive(new Modal(defaults));
+        component.setAttribute('x-show', 'open');
+        component.x_modal = Alpine.reactive(new Modal(config));
         document.body.appendChild(component);
 
         Alpine.data(id, () => component.x_modal);
@@ -220,6 +215,47 @@ export default function (Alpine, defaults = {}) {
     Object.defineProperty(Alpine, '$confirm', { get: () => modal.confirm.bind(modal) });
     Object.defineProperty(Alpine, '$prompt', { get: () => modal.prompt.bind(modal) });
 
-    const render = () => defaults.themes[defaults.theme].template;
-    Alpine.directive('modal', (el) => el.innerHTML = render());
+    const render = () => {
+        return config.themes[config.theme].template;
+    };
+    Alpine.directive('modal', (el, { expression }, { effect }) => {
+        effect(() => el.innerHTML = render());
+    });
+
+    Object.defineProperty(Alpine, 'modal', {
+        get: () => ({
+            config(key, value) {
+                if (key instanceof Object) {
+                    Object.entries(key).forEach(([k, v]) => this.config(k, v));
+
+                    return this;
+                }
+
+                if (key === 'themes') {
+                    Object.entries(value).forEach(([name, theme]) => this.addTheme(name, theme));
+
+                    return this;
+                }
+
+                deepMerge(config, { [key]: value });
+
+                return this;
+            },
+            theme(name) {
+                config.theme = name;
+
+                return this;
+            },
+            addTheme(name, theme) {
+                deepMerge(config, { themes: { [name]: theme instanceof Function ? theme() : theme } });
+
+                return this;
+            },
+            i18n(name, lang) {
+                deepMerge(config, { i18n: { [name]: lang } });
+
+                return this;
+            },
+        }),
+    });
 }

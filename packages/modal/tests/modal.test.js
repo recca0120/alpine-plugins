@@ -1,11 +1,11 @@
-import Alpine from 'alpinejs';
-import plugin from '../src';
 import '@testing-library/jest-dom';
 import { fireEvent, screen, waitFor, waitForElementToBeRemoved } from '@testing-library/dom';
+import Alpine from 'alpinejs';
+import modal from '../src';
 
-describe('Alpine $modal', () => {
+describe('Alpine modal', () => {
     beforeAll(() => {
-        plugin(Alpine);
+        Alpine.plugin(modal);
         Alpine.start();
     });
 
@@ -116,7 +116,7 @@ describe('Alpine $modal', () => {
                 const input = dialog.querySelector('input');
                 input._x_model.set('foo');
                 fireEvent.click(await screen.findByRole('button', { name: /cancel/i }));
-                await waitFor(async () => expect(await result).toBeFalsy);
+                await waitFor(async () => expect(await result).toBeFalsy());
             });
             await waitForElementToBeRemoved(() => screen.queryByRole('dialog', {}));
         });

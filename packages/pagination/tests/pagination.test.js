@@ -2,7 +2,7 @@ import '@testing-library/jest-dom';
 import { fireEvent, screen, waitFor } from '@testing-library/dom';
 import he from 'he';
 import Alpine from 'alpinejs';
-import plugin, { bootstrap5 } from '../src';
+import pagination, { bootstrap5 } from '../src';
 
 describe('Alpine pagination directive', () => {
     const encode = (text) => {
@@ -39,7 +39,9 @@ describe('Alpine pagination directive', () => {
     };
 
     beforeAll(() => {
-        plugin(Alpine, { themes: { bootstrap5 } });
+        // plugin(Alpine, { themes: { bootstrap5 } });
+        Alpine.plugin(pagination);
+        Alpine.pagination.addTheme('bootstrap5', bootstrap5);
         Alpine.start();
     });
 

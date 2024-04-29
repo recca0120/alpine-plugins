@@ -1,3 +1,17 @@
+export const emptyFn = () => {
+};
+
+export const deferred = () => {
+    let resolve;
+    let reject;
+    const promise = new Promise((_resolve, _reject) => {
+        resolve = _resolve;
+        reject = _reject;
+    });
+
+    return { promise, reject, resolve };
+};
+
 export const data_get = (obj, key) => {
     if (obj.hasOwnProperty(key)) {
         return obj[key];
@@ -18,44 +32,40 @@ export const data_get = (obj, key) => {
     return tmp;
 };
 
-/**
- * Performs a deep merge of objects and returns new object. Does not modify
- * objects (immutable) and merges arrays via concatenation.
- *
- * @param {...object} objects - Objects to merge
- * @returns {object} New object with merged key/values
- */
-export function mergeDeep(...objects) {
-    const isObject = obj => obj && typeof obj === 'object';
+export function deepMerge(...objects) {
+    const isObject = (obj) => obj && typeof obj === 'object';
 
-    return objects.reduce((prev, obj) => {
-        Object.keys(obj).forEach(key => {
-            const pVal = prev[key];
-            const oVal = obj[key];
+    function deepMergeInner(target, source) {
+        Object.keys(source).forEach((key) => {
+            const targetValue = target[key];
+            const sourceValue = source[key];
 
-            if (Array.isArray(pVal) && Array.isArray(oVal)) {
-                prev[key] = pVal.concat(...oVal);
-            } else if (isObject(pVal) && isObject(oVal)) {
-                prev[key] = mergeDeep(pVal, oVal);
+            if (Array.isArray(targetValue) && Array.isArray(sourceValue)) {
+                target[key] = targetValue.concat(sourceValue);
+            } else if (isObject(targetValue) && isObject(sourceValue)) {
+                target[key] = deepMergeInner(Object.assign({}, targetValue), sourceValue);
             } else {
-                prev[key] = oVal;
+                target[key] = sourceValue;
             }
         });
 
-        return prev;
-    }, {});
+        return target;
+    }
+
+    if (objects.length < 2) {
+        throw new Error('deepMerge: this function expects at least 2 objects to be provided');
+    }
+
+    if (objects.some(object => !isObject(object))) {
+        throw new Error('deepMerge: all values should be of type "object"');
+    }
+
+    const target = objects.shift();
+    let source;
+
+    while (source = objects.shift()) {
+        deepMergeInner(target, source);
+    }
+
+    return target;
 }
-
-export const emptyFn = () => {
-};
-
-export const deferred = () => {
-    let resolve;
-    let reject;
-    const promise = new Promise((_resolve, _reject) => {
-        resolve = _resolve;
-        reject = _reject;
-    });
-
-    return { promise, reject, resolve };
-};
